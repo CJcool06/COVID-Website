@@ -14,6 +14,7 @@
         <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
 
         <script src="javascripts/navbar.js" defer></script>
+        <script src="javascripts/profile.js" defer></script>
     </head>
 
     <body>
@@ -37,16 +38,18 @@
                                 <a class="nav-link active" aria-current="page" href="/about">About</a>
                             </li>
                         </ul>
-                        <ul v-if="!logged_in" class="navbar-nav">
+                        <ul v-if="!loggedIn" class="navbar-nav">
                             <li>
-                                <button class="btn btn-outline-success" type="submit" v-on:click="logged_in = true">Login</button>
+                                <button class="btn btn-outline-success" type="submit" onclick="login();">Login</button>
                             </li>
                             <li>
                                 <button class="btn btn-outline-primary btn-middle" type="submit">Sign Up!</button>
                             </li>
                         </ul>
                         <ul v-else class="navbar-nav">
-                            <li>Logged In!</li>
+                            <li>
+                                <a class="nav-link" href="/profile">Profile</a>
+                            </li>
                         </ul>
                     </div>
                 </div>
