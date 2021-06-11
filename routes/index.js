@@ -26,6 +26,11 @@ router.get('/profile', function(req, res, next) {
 	res.sendFile('profile.html', { root: __dirname + '/../public/' } );
 });
 
+/* GET privacy policy page. */
+router.get('/privacy_policy', function(req, res, next) {
+	res.sendFile('privacy_policy.html', { root: __dirname + '/../public/' } );
+});
+
 
 /* LOGIN HANDLING */
 

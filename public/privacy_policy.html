@@ -3,7 +3,7 @@
 <html lang="en">
 
     <head>
-        <title>Profile</title>
+        <title>Privacy Policy</title>
 
         <meta charset="utf-8">
         <link rel="stylesheet" href="stylesheets/style.css">
@@ -38,7 +38,7 @@
                                 <a class="nav-link" href="/about">About</a>
                             </li>
                             <li class="nav-item nav-middle">
-                                <a class="nav-link" href="/privacy_policy">Privacy Policy</a>
+                                <a class="nav-link active" aria-current="page" href="/privacy_policy">Privacy Policy</a>
                             </li>
                         </ul>
                         <ul v-if="!loggedIn" class="navbar-nav">
@@ -70,57 +70,30 @@
                 </div>
             </nav>
 
-            <div class="container-fluid" id="user">
-                <h5>ID: {{ id }}</h5>
-                <h5>NAME: {{ fName }} {{ lName }}</h5>
-                <h5>EMAIL: {{ email }}</h5>
-                <h5>PASSWORD: {{ password }}</h5>
-                <h5>ACCOUNT: {{ accountType }}</h5>
-
-
+            <div class="container-fluid">
+                <h1 class="body">Privacy Policy</h1>
+                <p class="body">This Privacy Policy was updated on June 6<sup class="body">th</sup> 2021</p>
+                <p class = "body">BY USING, REGISTERING OR OTHERWISE ACCESSING THE SERVICES, YOU AGREE TO THIS PRIVACY POLICY AND
+                GIVE AN EXPLICIT AND INFORMED CONSENT TO THE PROCESSING OF YOUR PERSONAL DATA IN ACCORDANCE WITH THIS PRIVACY POLICY.
+                IF YOU DO NOT AGREE TO THIS PRIVACY POLICY, PLEASE DO NOT USE OR REGISTER WITH THIS WEB APPLICATION.</p>
+                <p class = "body">The Group 111 team reserves the right to modify this privacy policy at reasonable times,
+                so please review it regularly. If significant changes are made by the Group 111 team to this Privacy Policy a notice may be provided by email.
+                Any continued use of the application or its services will signify acceptance of the Privacy Policy. </p>
+                <h3 class = "body">Use of Personal Data</h3>
+                <p class = "body">For the purposes of this Privacy Policy, “personal data” refers to all data collected by the COVID Tracing application
+                and its services. The South Australian Chief Health Officer has powers under the Public Health Act to make any directions necessary to
+                contain the spread of COVID-19 within the community. The personal data collected by this application will only be used in accordance with
+                those directions. Examples of personal data being collected include but are not limited to, your name, your email, and your location. </p>
+                <h3 class = "body">Disclosure or Transfer of Personal Data</h3>
+                <p class = "body">This may include your personal information being shared with SA Health officials,
+                or third-party services required to facilitate the service.
+                Personal data will never intentionally be shared outside of Australia.</p>
+                <h3 class = "body">Data Security</h3>
+                <p class = "body">The Group 111 team follow generally accepted industry standards related to online Cyber Security in order
+                to attempt to ensure all data captured by the application is kept secure. However,
+                no system can be completely protected and there is a possibility that your data could be accessed
+                despite the reasonable efforts of the Group 111 team.</p>
             </div>
-
-            <!-- <div class="d-flex flex-column flex-shrink-0 p-3 bg-light" style="width: 280px;">
-                <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-dark text-decoration-none">
-                  <svg class="bi me-2" width="40" height="32"><use xlink:href="#bootstrap"></use></svg>
-                  <span class="fs-4">Sidebar</span>
-                </a>
-                <hr>
-                <ul class="nav nav-pills flex-column mb-auto">
-                  <li class="nav-item">
-                    <a href="#" class="nav-link active" aria-current="page">
-                      <svg class="bi me-2" width="16" height="16"><use xlink:href="#home"></use></svg>
-                      Home
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#" class="nav-link link-dark">
-                      <svg class="bi me-2" width="16" height="16"><use xlink:href="#speedometer2"></use></svg>
-                      Dashboard
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#" class="nav-link link-dark">
-                      <svg class="bi me-2" width="16" height="16"><use xlink:href="#table"></use></svg>
-                      Orders
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#" class="nav-link link-dark">
-                      <svg class="bi me-2" width="16" height="16"><use xlink:href="#grid"></use></svg>
-                      Products
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#" class="nav-link link-dark">
-                      <svg class="bi me-2" width="16" height="16"><use xlink:href="#people-circle"></use></svg>
-                      Customers
-                    </a>
-                  </li>
-                </ul>
-                <hr>
-            </div> -->
-
 
         </div>
 
