@@ -1,7 +1,6 @@
 // COVID live data
 // https://api.covid19api.com/live/country/australia/status/confirmed/date/2021-05-11T00:00:00Z
 
-// eslint-disable-next-line no-undef
 var covidData = new Vue({
     el: "#covid-data",
     data: {
