@@ -49,6 +49,11 @@ router.post("/login", function(req, res, next) {
 	}
 });
 
+router.post("/logout", function(req, res, next) {
+	loggedIn = false;
+	res.sendStatus(200);
+});
+
 router.get("/loggedin", function(req, res, next) {
 	if (loggedIn) {
 		res.status(200).json(account);
