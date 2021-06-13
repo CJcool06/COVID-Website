@@ -93,7 +93,7 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a v-on:click="profileNav = 'Check-In'" href="#" class="nav-link link-dark text-center" v-bind:class="[ profileNav === 'Check-In' ?  'active' : '' ]">
+                                <a v-on:click="profileNav = 'Check-In'" onclick="populateUserCheckins();" href="#" class="nav-link link-dark text-center" v-bind:class="[ profileNav === 'Check-In' ?  'active' : '' ]">
                                     <!-- <svg class="bi me-2" width="16" height="16"><use xlink:href="#speedometer2"></use></svg> -->
                                     Check-In
                                 </a>
@@ -105,7 +105,7 @@
                                 </span>
                             </li>
                             <li class="nav-item">
-                                <a v-on:click="profileNav = 'My-Venues'" href="#" class="nav-link link-dark text-center" v-bind:class="[ profileNav === 'My-Venues' ?  'active' : profileNav === 'My-Venues-Clicked' ? 'active' : '' ]">
+                                <a v-on:click="profileNav = 'My-Venues'" onclick="populateUserVenues();" href="#" class="nav-link link-dark text-center" v-bind:class="[ profileNav === 'My-Venues' ?  'active' : profileNav === 'My-Venues-Clicked' ? 'active' : '' ]">
                                     <!-- <svg class="bi me-2" width="16" height="16"><use xlink:href="#grid"></use></svg> -->
                                     My Venues
                                 </a>
@@ -162,8 +162,12 @@
                                 <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
                             </div>
                             <div class="mb-3">
-                                <label for="password" class="form-label">Password</label>
-                                <input type="text" class="form-control" id="password"  v-bind:value="password">
+                                <label for="oldPassword" class="form-label">Old Password</label>
+                                <input type="text" class="form-control" id="oldPassword" v-bind:value="password" disabled>
+                            </div>
+                            <div class="mb-3">
+                                <label for="newPassword" class="form-label">New Password</label>
+                                <input type="text" class="form-control" id="newPassword" maxlength="20">
                             </div>
                             <div class="mb-3">
                                 <label for="accountType" class="form-label">Account Type</label>
@@ -173,7 +177,8 @@
                                     <option value="official">Health Official</option>
                                 </select>
                             </div>
-                            <button id="saveButton" type="submit" class="btn btn-primary" onclick="setTimeout(unclickButton('saveButton'), 250);">Save</button>
+                            <button id="saveButton" type="submit" class="btn btn-primary" onclick="setTimeout(unclickButton('saveButton'), 250); saveUserInformation();">Save</button>
+                            <div id="alerts" class="d-flex align-items-center justify-content-center col-4"></div>
                         </form>
                     </div>
                     <div v-else-if="profileNav == 'Check-In'" class="container-fluid">
@@ -204,78 +209,12 @@
                                         <th scope="col">Date</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody v-for="(checkin, index) in checkins">
                                     <tr>
-                                        <th scope="row">1</th>
-                                        <td>Starbucks</td>
-                                        <td>GVMkhjbd</td>
-                                        <td>2021-06-11 13:54:09</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">2</th>
-                                        <td>Bunnings</td>
-                                        <td>KJNi676d</td>
-                                        <td>2021-06-11 13:54:09</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">3</th>
-                                        <td>Web & Database Lecture</td>
-                                        <td>87asgdyhD</td>
-                                        <td>2021-06-11 13:54:09</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">1</th>
-                                        <td>Starbucks</td>
-                                        <td>GVMkhjbd</td>
-                                        <td>2021-06-11 13:54:09</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">2</th>
-                                        <td>Bunnings</td>
-                                        <td>KJNi676d</td>
-                                        <td>2021-06-11 13:54:09</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">3</th>
-                                        <td>Web & Database Lecture</td>
-                                        <td>87asgdyhD</td>
-                                        <td>2021-06-11 13:54:09</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">1</th>
-                                        <td>Starbucks</td>
-                                        <td>GVMkhjbd</td>
-                                        <td>2021-06-11 13:54:09</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">2</th>
-                                        <td>Bunnings</td>
-                                        <td>KJNi676d</td>
-                                        <td>2021-06-11 13:54:09</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">3</th>
-                                        <td>Web & Database Lecture</td>
-                                        <td>87asgdyhD</td>
-                                        <td>2021-06-11 13:54:09</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">1</th>
-                                        <td>Starbucks</td>
-                                        <td>GVMkhjbd</td>
-                                        <td>2021-06-11 13:54:09</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">2</th>
-                                        <td>Bunnings</td>
-                                        <td>KJNi676d</td>
-                                        <td>2021-06-11 13:54:09</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">3</th>
-                                        <td>Web & Database Lecture</td>
-                                        <td>87asgdyhD</td>
-                                        <td>2021-06-11 13:54:09</td>
+                                        <th scope="row">{{ index+1 }}</th>
+                                        <td>{{ checkin.venue }}</td>
+                                        <td>{{ checkin.code }}</td>
+                                        <td>{{ checkin.time }}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -326,13 +265,14 @@
                                 </div>
                                 <div class="mb-3">
                                     <label for="venueLatitude" class="form-label">Latitude</label>
-                                    <input type="text" class="form-control" id="venueLatitude" v-bind:value="activeVenue.lat">
+                                    <input type="text" class="form-control" id="venueLatitude" v-bind:value="activeVenue.latitude">
                                 </div>
                                 <div class="mb-3">
                                     <label for="venueLongitude" class="form-label">Longitude</label>
-                                    <input type="text" class="form-control" id="venueLongitude" v-bind:value="activeVenue.long">
+                                    <input type="text" class="form-control" id="venueLongitude" v-bind:value="activeVenue.longitude">
                                 </div>
-                                <button id="saveButtonVenue" type="submit" class="btn btn-primary" onclick="setTimeout(unclickButton('saveButtonVenue'), 250);">Save</button>
+                                <button id="saveButtonVenue" type="submit" class="btn btn-primary" onclick="setTimeout(unclickButton('saveButtonVenue'), 250); saveVenueInformation();">Save</button>
+                                <div id="alerts" class="d-flex align-items-center justify-content-center col-6"></div>
                             </form>
                         </div>
                         <br>
@@ -350,78 +290,12 @@
                                         <th scope="col">Location (lat, long)</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    <tr onclick="populateVenueData('GVMkhjbd');" v-on:click="profileNav = 'My-Venues-Clicked'">
-                                        <th scope="row">1</th>
-                                        <td>Starbucks</td>
-                                        <td>GVMkhjbd</td>
-                                        <td>-34.928, 138.601</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">2</th>
-                                        <td>Bunnings</td>
-                                        <td>KJNi676d</td>
-                                        <td>-34.928, 138.601</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">3</th>
-                                        <td>Adelaide Uni</td>
-                                        <td>87asgdyhD</td>
-                                        <td>-34.928, 138.601</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">4</th>
-                                        <td>Starbucks 2</td>
-                                        <td>GVMkhjbd</td>
-                                        <td>-34.928, 138.601</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">5</th>
-                                        <td>Bunnings 2</td>
-                                        <td>KJNi676d</td>
-                                        <td>-34.928, 138.601</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">6</th>
-                                        <td>Adelaide Uni 2</td>
-                                        <td>87asgdyhD</td>
-                                        <td>-34.928, 138.601</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">7</th>
-                                        <td>Starbucks 3</td>
-                                        <td>GVMkhjbd</td>
-                                        <td>-34.928, 138.601</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">8</th>
-                                        <td>Bunnings 3</td>
-                                        <td>KJNi676d</td>
-                                        <td>-34.928, 138.601</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">9</th>
-                                        <td>Adelaide Uni 3</td>
-                                        <td>87asgdyhD</td>
-                                        <td>-34.928, 138.601</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">10</th>
-                                        <td>Starbucks 4</td>
-                                        <td>GVMkhjbd</td>
-                                        <td>-34.928, 138.601</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">11</th>
-                                        <td>Bunnings 4</td>
-                                        <td>KJNi676d</td>
-                                        <td>-34.928, 138.601</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">12</th>
-                                        <td>Adelaide Uni 4</td>
-                                        <td>87asgdyhD</td>
-                                        <td>-34.928, 138.601</td>
+                                <tbody v-for="(venue, index) in venues">
+                                    <tr @click="popVenueData(venue.code);" v-on:click="profileNav = 'My-Venues-Clicked'">
+                                        <th scope="row">{{ venue.id+1 }}</th>
+                                        <td>{{ venue.name }}</td>
+                                        <td>{{ venue.code }}</td>
+                                        <td>{{ venue.latitude }}, {{ venue.longitude }}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -435,26 +309,11 @@
                                         <th scope="col">Date</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody v-for="(checkin, index) in venueCheckins">
                                     <tr>
-                                        <th scope="row">1</th>
-                                        <td>Chris</td>
-                                        <td>2021-06-11 13:54:09</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">2</th>
-                                        <td>Matt</td>
-                                        <td>2021-06-11 13:54:09</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">3</th>
-                                        <td>Chelsea</td>
-                                        <td>2021-06-11 13:54:09</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">4</th>
-                                        <td>Angel</td>
-                                        <td>2021-06-11 13:54:09</td>
+                                        <th scope="row">{{ index+1 }}</th>
+                                        <td>{{ checkin.user }}</td>
+                                        <td>{{ checkin.time }}</td>
                                     </tr>
                                 </tbody>
                             </table>

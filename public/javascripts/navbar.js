@@ -14,8 +14,9 @@ var nav = new Vue({
 
 function login() {
     // For testing
-    let email = "person.smith@fakemail.com";
+    let email = "chris@gmail.com";
     let password = "12345";
+    let cookie = "999";
 
     let http = new XMLHttpRequest();
     http.open("POST", "/login");
@@ -40,11 +41,11 @@ function login() {
         }
     }
 
-    http.send(JSON.stringify({'email': email, 'password': password}));
+    http.send(JSON.stringify({'email': email, 'password': password, 'cookie': cookie}));
 }
 
 function logout() {
-    let email = "person.smith@fakemail.com";
+    let cookie = "999";
 
     let http = new XMLHttpRequest();
     http.open("POST", "/logout");
@@ -69,12 +70,16 @@ function logout() {
         }
     }
 
-    http.send(JSON.stringify({'email': email}));
+    http.send(JSON.stringify({'cookie': cookie}));
 }
 
 function loadUser() {
+    let cookie = "999";
+
     var http = new XMLHttpRequest();
+    http.open("POST", "/loggedin");
     http.responseType = "json";
+    http.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
 
     http.onreadystatechange = function() {
         if (this.readyState == 4) {
@@ -94,6 +99,5 @@ function loadUser() {
         }
     }
 
-    http.open("GET", "/loggedin", true);
-    http.send();
+    http.send(JSON.stringify({'cookie': cookie}));
 }
