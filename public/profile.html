@@ -14,6 +14,8 @@
         <!-- Vue -->
         <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
 
+        <script src='https://kit.fontawesome.com/a076d05399.js' crossorigin='anonymous'></script>
+
         <script src="javascripts/navbar.js" defer></script>
         <script src="javascripts/profile.js" defer></script>
     </head>
@@ -117,7 +119,7 @@
                                 </span>
                             </li>
                             <li class="nav-item">
-                                <a v-on:click="profileNav = 'Hotspots'" href="#" class="nav-link link-dark text-center" v-bind:class="[ profileNav === 'Hotspots' ?  'active' : '' ]">
+                                <a v-on:click="profileNav = 'Hotspots'" onclick="populateHotspots();" href="#" class="nav-link link-dark text-center" v-bind:class="[ profileNav === 'Hotspots' ?  'active' : profileNav === 'Hotspots-Clicked' ? 'active' : '' ]">
                                     <!-- <svg class="bi me-2" width="16" height="16"><use xlink:href="#people-circle"></use></svg> -->
                                     Hotspots
                                 </a>
@@ -251,8 +253,8 @@
                         <div v-else>
                             <form>
                                 <div class="row">
-                                    <a class="col-1" href="#" v-on:click="profileNav = 'My-Venues'">Back(icon)</a>
-                                    <h5 class="col-10 text-center">{{ activeVenue.name }} Details</h5>
+                                    <i class='fas fa-angle-left col-2' style='font-size:24px; color: gray; cursor: pointer;' v-on:click="profileNav = 'My-Venues'"> Back</i>
+                                    <h5 class="col-8 text-center">{{ activeVenue.name }} Details</h5>
                                 </div>
                                 <hr>
                                 <div class="mb-3">
@@ -291,7 +293,7 @@
                                     </tr>
                                 </thead>
                                 <tbody v-for="(venue, index) in venues">
-                                    <tr @click="popVenueData(venue.code);" v-on:click="profileNav = 'My-Venues-Clicked'">
+                                    <tr @click="popVenueData(venue.code);" v-on:click="profileNav = 'My-Venues-Clicked'" style="cursor: pointer;">
                                         <th scope="row">{{ venue.id+1 }}</th>
                                         <td>{{ venue.name }}</td>
                                         <td>{{ venue.code }}</td>
@@ -319,10 +321,10 @@
                             </table>
                         </div>
                     </div>
-                    <div v-else-if="profileNav == 'Hotspots'" class="container-fluid">
+                    <div v-else-if="profileNav == 'Hotspots' || profileNav == 'Hotspots-Clicked'" class="container-fluid">
                         <h1>Manage Hotspots</h1>
                         <hr>
-                        <div class="row mb-3">
+                        <div v-if="profileNav == 'Hotspots'" class="row mb-3">
                             <label for="addHotspotButton" class="form-label">Venue Code</label>
                             <div class="col-3">
                                 <input type="text" class="form-control" id="checkinCode" placeholder="Enter a venue's code">
@@ -332,11 +334,40 @@
                                 <button id="removeHotspotButton" type="submit" class="btn btn-primary" onclick="setTimeout(unclickButton('removeHotspotButton'), 250);">Remove</button>
                             </div>
                         </div>
+                        <div v-else>
+                            <form>
+                                <div class="row">
+                                    <!-- <a class="col-1" href="#" v-on:click="profileNav = 'Venues'">Back(icon)</a> -->
+                                    <i class='fas fa-angle-left col-2' style='font-size:24px; color: gray; cursor: pointer;' v-on:click="profileNav = 'Hotspots'"> Back</i>
+                                    <h5 class="col-8 text-center">{{ activeVenue.name }} Details</h5>
+                                </div>
+                                <hr>
+                                <div class="mb-3">
+                                    <label for="venueCode" class="form-label">Code</label>
+                                    <input type="text" class="form-control" id="venueCode" v-bind:value="activeVenue.code" readonly>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="venueName" class="form-label">Name</label>
+                                    <input type="text" class="form-control" id="venueName" v-bind:value="activeVenue.name">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="venueLatitude" class="form-label">Latitude</label>
+                                    <input type="text" class="form-control" id="venueLatitude" v-bind:value="activeVenue.latitude">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="venueLongitude" class="form-label">Longitude</label>
+                                    <input type="text" class="form-control" id="venueLongitude" v-bind:value="activeVenue.longitude">
+                                </div>
+                                <button id="saveButton" type="submit" class="btn btn-primary" onclick="setTimeout(unclickButton('saveButton'), 250); saveVenueInformation();">Save</button>
+                                <div id="alerts" class="d-flex align-items-center justify-content-center col-6"></div>
+                            </form>
+                        </div>
                         <br>
                         <hr>
-                        <h5>Hotspots</h5>
+                        <h5 v-if="profileNav == 'Hotspots'">Hotspots</h5>
+                        <h5 v-else class="text-center">Check-Ins</h5>
                         <hr>
-                        <div class="scrollable">
+                        <div v-if="profileNav == 'Hotspots'" class="scrollable">
                             <table class="table table-striped table-hover tableFixHead" id="history">
                                 <thead class="table-dark">
                                     <tr>
@@ -347,27 +378,31 @@
                                         <th scope="col">Since</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    <tr>
-                                        <th scope="row">1</th>
-                                        <td>Starbucks</td>
-                                        <td>GVMkhjbd</td>
-                                        <td>-34.928, 138.601</td>
-                                        <td>2021-06-11 13:54:09</td>
+                                <tbody v-for="(hotspot, index) in hotspots">
+                                    <tr @click="popVenueData(hotspot.venue.code);" v-on:click="profileNav = 'Hotspots-Clicked'" style="cursor: pointer;">
+                                        <th scope="row">{{ index+1 }}</th>
+                                        <td>{{ hotspot.venue.name }}</td>
+                                        <td>{{ hotspot.venue.code }}</td>
+                                        <td>{{ hotspot.venue.latitude }}, {{ hotspot.venue.longitude }}</td>
+                                        <td>{{ hotspot.since }}</td>
                                     </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div v-else class="scrollable">
+                            <table class="table table-striped table-hover tableFixHead" id="history">
+                                <thead class="table-dark">
                                     <tr>
-                                        <th scope="row">2</th>
-                                        <td>Bunnings</td>
-                                        <td>KJNi676d</td>
-                                        <td>-34.928, 138.601</td>
-                                        <td>2021-06-11 13:54:09</td>
+                                        <th scope="col">#</th>
+                                        <th scope="col">Name</th>
+                                        <th scope="col">Date</th>
                                     </tr>
+                                </thead>
+                                <tbody v-for="(checkin, index) in venueCheckins">
                                     <tr>
-                                        <th scope="row">3</th>
-                                        <td>Adelaide Uni</td>
-                                        <td>87asgdyhD</td>
-                                        <td>-34.928, 138.601</td>
-                                        <td>2021-06-11 13:54:09</td>
+                                        <th scope="row">{{ index+1 }}</th>
+                                        <td>{{ checkin.user }}</td>
+                                        <td>{{ checkin.time }}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -405,8 +440,8 @@
                         <hr v-if="profileNav == 'Users'">
                         <h5 v-if="profileNav != 'Users-Clicked'">All Users</h5>
                         <div v-else class="row">
-                            <a class="col-1" href="#" v-on:click="profileNav = 'Users'">Back(icon)</a>
-                            <h5 class="col-10 text-center">{{ activeUser.fName }}'s Details</h5>
+                            <i class='fas fa-angle-left col-2' style='font-size:24px; color: gray; cursor: pointer;' v-on:click="profileNav = 'Users'"> Back</i>
+                            <h5 class="col-8 text-center">{{ activeUser.fName }}'s Details</h5>
                         </div>
                         <hr>
                         <div v-if="profileNav != 'Users-Clicked'" class="scrollable">
@@ -419,7 +454,7 @@
                                     </tr>
                                 </thead>
                                 <tbody v-for="(user, index) in users">
-                                    <tr @click="popUserData(user.email);" v-on:click="profileNav = 'Users-Clicked'">
+                                    <tr @click="popUserData(user.email);" v-on:click="profileNav = 'Users-Clicked'" style="cursor: pointer;">
                                         <th scope="row">{{ index+1 }}</th>
                                         <td>{{ user.fName }} {{ user.lName }}</td>
                                         <td>{{ user.email }}</td>
@@ -494,8 +529,8 @@
                         <div v-else>
                             <form>
                                 <div class="row">
-                                    <a class="col-1" href="#" v-on:click="profileNav = 'Venues'">Back(icon)</a>
-                                    <h5 class="col-10 text-center">{{ activeVenue.name }} Details</h5>
+                                    <i class='fas fa-angle-left col-2' style='font-size:24px; color: gray; cursor: pointer;' v-on:click="profileNav = 'Venues'"> Back</i>
+                                    <h5 class="col-8 text-center">{{ activeVenue.name }} Details</h5>
                                 </div>
                                 <hr>
                                 <div class="mb-3">
@@ -535,7 +570,7 @@
                                     </tr>
                                 </thead>
                                 <tbody v-for="(venue, index) in venues">
-                                    <tr @click="popVenueData(venue.code);" v-on:click="profileNav = 'Venues-Clicked'">
+                                    <tr @click="popVenueData(venue.code);" v-on:click="profileNav = 'Venues-Clicked'" style="cursor: pointer;">
                                         <th scope="row">{{ index+1 }}</th>
                                         <td>{{ venue.name }}</td>
                                         <td>{{ venue.code  }}</td>

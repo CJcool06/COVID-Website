@@ -15,7 +15,8 @@ var userProfile = new Vue({
         checkins: [{}],
         venues: [{}],
         venueCheckins: [{}],
-        users: [{}]
+        users: [{}],
+        hotspots: [{}]
     },
     methods: {
         popVenueData(venueCode) {
@@ -172,6 +173,27 @@ function populateVenues() {
     http.send(JSON.stringify({ 'email': userProfile.email, 'password': userProfile.password }));
 }
 
+function populateHotspots() {
+    let http = new XMLHttpRequest();
+    http.open("POST", "/hotspots");
+    http.responseType = "json";
+    http.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
+
+    http.onreadystatechange = function() {
+        if (this.readyState == 4) {
+            if (this.status != 200) {
+                console.log(this.response.error);
+            }
+            else {
+                userProfile.hotspots = this.response;
+                console.log(userProfile.hotspots);
+            }
+        }
+    }
+
+    http.send(JSON.stringify({ 'email': userProfile.email, 'password': userProfile.password }));
+}
+
 function saveUserInformation() {
     let fName = document.getElementById("firstName").value;
     let lName = document.getElementById("lastName").value;
@@ -205,7 +227,7 @@ function saveUserInformation() {
         }
     }
 
-    http.send(JSON.stringify({ 'fName': fName, 'lName': lName, 'oldPassword': oldPassword, 'newPassword': newPassword, 'email': email, 'accountType': accountType, 'authEmail': email, 'authPassword': password }));
+    http.send(JSON.stringify({ 'fName': fName, 'lName': lName, 'oldPassword': oldPassword, 'newPassword': newPassword, 'email': email, 'accountType': accountType, 'authEmail': email, 'authPassword': oldPassword }));
 }
 
 function saveOtherUserInformation() {

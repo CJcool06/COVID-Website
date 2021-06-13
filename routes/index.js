@@ -205,7 +205,7 @@ router.post("/save-user", function(req, res) {
 	let authPassword = req.body.authPassword;
 
 	// No auth needed, the user is submitting this request
-	if (authEmail == email && authPassword == password) {
+	if ((authEmail === email) && (authPassword === oldPassword)) {
 		getUserFromEmail(email, (err, users) => {
 			if (err) {
 				console.log(err);
@@ -319,7 +319,23 @@ router.post("/user/checkins", function(req, res, next) {
 					return res.status(203).json({"error": "Problem getting user's checkins."})
 				}
 				else {
-					return res.status(200).json(checkins);
+					let changeNames = new Promise((resolve, reject) => {
+						let count = 0;
+						for (const index in checkins) {
+							getUserFromIDDB(checkins[index].user, (err, users) => {
+								checkins[index].user = users[0].fName + " " + users[0].lName;
+								checkins[index].time = new Date(checkins[index].time).toISOString().replace("T", " ").replace(".000Z", "");
+								count++;
+								if (count == (checkins.length)) {
+									resolve();
+								}
+							});
+						}
+					});
+		
+					changeNames.then(() => {
+						return res.status(200).json(checkins);
+					});
 				}
 			})
 		}
@@ -367,6 +383,7 @@ router.post("/venue/checkins", function(req, res, next) {
 				for (const index in checkins) {
 					getUserFromIDDB(checkins[index].user, (err, users) => {
 						checkins[index].user = users[0].fName + " " + users[0].lName;
+						checkins[index].time = new Date(checkins[index].time).toISOString().replace("T", " ").replace(".000Z", "");
 						count++;
 						if (count == (checkins.length)) {
 							resolve();
@@ -377,6 +394,44 @@ router.post("/venue/checkins", function(req, res, next) {
 
 			changeNames.then(() => {
 				return res.status(200).json(checkins);
+			});
+		}
+	});
+});
+
+router.post("/hotspots", function(req, res, next) {
+	let email = req.body.email;
+	let password = req.body.password;
+
+	sensitiveInformationAuth(email, password, (authenticated) => {
+		if (!authenticated) {
+			res.status(203).json({"error": "Wrong permissions."});
+		}
+		else {
+			getHotspotsDB((err, allHotspots) => {
+				if (err) {
+					console.log(err);
+					res.status(203).json({"error": "Database error."});
+				}
+				else {
+					let changeNames = new Promise((resolve, reject) => {
+						let count = 0;
+						for (const index in allHotspots) {
+							getVenueDB(allHotspots[index].venue, (err, venues) => {
+								allHotspots[index].venue = venues[0];
+								allHotspots[index].since = new Date(allHotspots[index].since).toISOString().replace("T", " ").replace(".000Z", "");
+								count++;
+								if (count == (allHotspots.length)) {
+									resolve();
+								}
+							});
+						}
+					});
+		
+					changeNames.then(() => {
+						return res.status(200).json(allHotspots);
+					});
+				}
 			});
 		}
 	});
@@ -396,7 +451,9 @@ function getLoggedInUser(cookie, callback) {
 				else if (users.length <= 0) {
 					return callback(null);
 				}
-				return callback(users[0]);
+				else {
+					return callback(users[0]);
+				}
 			});
 		}
 	}
@@ -623,6 +680,21 @@ function getVenueCheckinsDB(code, callback) {
 				return callback(err, null);
 			}
 			return callback(null, checkins);
+		});
+		con.release();
+	});
+}
+
+function getHotspotsDB(callback) {
+	pool.getConnection((err, con) => {
+		if (err) {
+			return callback(err, null);
+		}
+		con.query("SELECT * FROM hotspots", (err, hotspots) => {
+			if (err) {
+				return callback(err, null);
+			}
+			return callback(null, hotspots);
 		});
 		con.release();
 	});
