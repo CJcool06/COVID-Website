@@ -123,13 +123,13 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a v-on:click="profileNav = 'Users'" href="#" class="nav-link link-dark text-center" v-bind:class="[ profileNav === 'Users' ?  'active' : profileNav === 'Users-Clicked' ? 'active' : '' ]">
+                                <a v-on:click="profileNav = 'Users'" onclick="populateUsers();" href="#" class="nav-link link-dark text-center" v-bind:class="[ profileNav === 'Users' ?  'active' : profileNav === 'Users-Clicked' ? 'active' : '' ]">
                                     <!-- <svg class="bi me-2" width="16" height="16"><use xlink:href="#people-circle"></use></svg> -->
                                     Users
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a v-on:click="profileNav = 'Venues'" href="#" class="nav-link link-dark text-center" v-bind:class="[ profileNav === 'Venues' ?  'active' : profileNav === 'Venues-Clicked' ? 'active' : '' ]">
+                                <a v-on:click="profileNav = 'Venues'" onclick="populateVenues();" href="#" class="nav-link link-dark text-center" v-bind:class="[ profileNav === 'Venues' ?  'active' : profileNav === 'Venues-Clicked' ? 'active' : '' ]">
                                     <!-- <svg class="bi me-2" width="16" height="16"><use xlink:href="#people-circle"></use></svg> -->
                                     Venues
                                 </a>
@@ -162,8 +162,8 @@
                                 <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
                             </div>
                             <div class="mb-3">
-                                <label for="oldPassword" class="form-label">Old Password</label>
-                                <input type="text" class="form-control" id="oldPassword" v-bind:value="password" disabled>
+                                <label for="password" class="form-label">Password</label>
+                                <input type="text" class="form-control" id="password" v-bind:value="password" disabled>
                             </div>
                             <div class="mb-3">
                                 <label for="newPassword" class="form-label">New Password</label>
@@ -418,26 +418,11 @@
                                         <th scope="col">Email</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    <tr onclick="populateUserData('chris@gmail.com');" v-on:click="profileNav = 'Users-Clicked'">
-                                        <th scope="row">1</th>
-                                        <td>Chris</td>
-                                        <td>chris@gmail.com</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">2</th>
-                                        <td>Matt</td>
-                                        <td>matt@gmail.com</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">3</th>
-                                        <td>Chelsea</td>
-                                        <td>chelsea@gmail.com</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">4</th>
-                                        <td>Angel</td>
-                                        <td>angel@gmail.com</td>
+                                <tbody v-for="(user, index) in users">
+                                    <tr @click="popUserData(user.email);" v-on:click="profileNav = 'Users-Clicked'">
+                                        <th scope="row">{{ index+1 }}</th>
+                                        <td>{{ user.fName }} {{ user.lName }}</td>
+                                        <td>{{ user.email }}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -459,17 +444,22 @@
                                 </div>
                                 <div class="mb-3">
                                     <label for="password" class="form-label">Password</label>
-                                    <input type="text" class="form-control" id="password"  v-bind:value="activeUser.password">
+                                    <input type="text" class="form-control" id="password"  v-bind:value="activeUser.password" disabled>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="usersAccountType" class="form-label">Account Type</label>
-                                    <select class="form-select" id="usersAccountType" v-bind:value="activeUser.accountType">
+                                    <label for="newPassword" class="form-label">New Password</label>
+                                    <input type="text" class="form-control" id="newPassword" maxlength="20">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="accountType" class="form-label">Account Type</label>
+                                    <select class="form-select" id="accountType" v-bind:value="activeUser.accountType">
                                         <option value="normal">Normal</option>
                                         <option value="venueOwner">Manager</option>
                                         <option value="official">Health Official</option>
                                     </select>
                                 </div>
-                                <button id="usersSaveButton" type="submit" class="btn btn-primary" onclick="setTimeout(unclickButton('usersSaveButton'), 250);">Save</button>
+                                <button id="usersSaveButton" type="submit" class="btn btn-primary" onclick="setTimeout(unclickButton('usersSaveButton'), 250); saveOtherUserInformation();">Save</button>
+                                <div id="alerts" class="d-flex align-items-center justify-content-center col-6"></div>
                             </form>
                         </div>
                     </div>
@@ -484,7 +474,7 @@
                                         <input type="text" class="form-control" id="venuesVenueCode" placeholder="Enter a code" maxlength="20">
                                     </div>
                                     <div class="col-4">
-                                        <button id="manageVenuesRemoveButton" type="create" class="btn btn-primary" onclick="setTimeout(unclickButton('removeVenueButton'), 250);">Remove</button>
+                                        <button id="manageVenuesRemoveButton" type="create" class="btn btn-primary" onclick="setTimeout(unclickButton('manageVenuesRemoveButton'), 250);">Remove</button>
                                     </div>
                                 </div>
                             </div>
@@ -509,22 +499,23 @@
                                 </div>
                                 <hr>
                                 <div class="mb-3">
-                                    <label for="venuesVenueCode" class="form-label">Code</label>
-                                    <input type="text" class="form-control" id="venuesVenueCode" v-bind:value="activeVenue.code" readonly>
+                                    <label for="venueCode" class="form-label">Code</label>
+                                    <input type="text" class="form-control" id="venueCode" v-bind:value="activeVenue.code" readonly>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="venuesVenueName" class="form-label">Name</label>
-                                    <input type="text" class="form-control" id="venuesVenueName" v-bind:value="activeVenue.name">
+                                    <label for="venueName" class="form-label">Name</label>
+                                    <input type="text" class="form-control" id="venueName" v-bind:value="activeVenue.name">
                                 </div>
                                 <div class="mb-3">
-                                    <label for="venuesVenueLatitude" class="form-label">Latitude</label>
-                                    <input type="text" class="form-control" id="venuesVenueLatitude" v-bind:value="activeVenue.lat">
+                                    <label for="venueLatitude" class="form-label">Latitude</label>
+                                    <input type="text" class="form-control" id="venueLatitude" v-bind:value="activeVenue.latitude">
                                 </div>
                                 <div class="mb-3">
-                                    <label for="venuesVenueLongitude" class="form-label">Longitude</label>
-                                    <input type="text" class="form-control" id="venuesVenueLongitude" v-bind:value="activeVenue.long">
+                                    <label for="venueLongitude" class="form-label">Longitude</label>
+                                    <input type="text" class="form-control" id="venueLongitude" v-bind:value="activeVenue.longitude">
                                 </div>
-                                <button id="saveButtonVenueVenues" type="submit" class="btn btn-primary" onclick="setTimeout(unclickButton('saveButtonVenueVenues'), 250);">Save</button>
+                                <button id="saveButton" type="submit" class="btn btn-primary" onclick="setTimeout(unclickButton('saveButton'), 250); saveVenueInformation();">Save</button>
+                                <div id="alerts" class="d-flex align-items-center justify-content-center col-6"></div>
                             </form>
                         </div>
                         <br>
@@ -543,90 +534,13 @@
                                         <th scope="col">Owner</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    <tr onclick="populateVenueData('GVMkhjbd');" v-on:click="profileNav = 'Venues-Clicked'">
-                                        <th scope="row">1</th>
-                                        <td>Starbucks</td>
-                                        <td>GVMkhjbd</td>
-                                        <td>-34.928, 138.601</td>
-                                        <td>Chris</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">2</th>
-                                        <td>Bunnings</td>
-                                        <td>KJNi676d</td>
-                                        <td>-34.928, 138.601</td>
-                                        <td>Chris</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">3</th>
-                                        <td>Adelaide Uni</td>
-                                        <td>87asgdyhD</td>
-                                        <td>-34.928, 138.601</td>
-                                        <td>Chris</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">4</th>
-                                        <td>Starbucks 2</td>
-                                        <td>GVMkhjbd</td>
-                                        <td>-34.928, 138.601</td>
-                                        <td>Chris</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">5</th>
-                                        <td>Bunnings 2</td>
-                                        <td>KJNi676d</td>
-                                        <td>-34.928, 138.601</td>
-                                        <td>Chris</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">6</th>
-                                        <td>Adelaide Uni 2</td>
-                                        <td>87asgdyhD</td>
-                                        <td>-34.928, 138.601</td>
-                                        <td>Chris</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">7</th>
-                                        <td>Starbucks 3</td>
-                                        <td>GVMkhjbd</td>
-                                        <td>-34.928, 138.601</td>
-                                        <td>Chris</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">8</th>
-                                        <td>Bunnings 3</td>
-                                        <td>KJNi676d</td>
-                                        <td>-34.928, 138.601</td>
-                                        <td>Chris</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">9</th>
-                                        <td>Adelaide Uni 3</td>
-                                        <td>87asgdyhD</td>
-                                        <td>-34.928, 138.601</td>
-                                        <td>Chris</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">10</th>
-                                        <td>Starbucks 4</td>
-                                        <td>GVMkhjbd</td>
-                                        <td>-34.928, 138.601</td>
-                                        <td>Chris</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">11</th>
-                                        <td>Bunnings 4</td>
-                                        <td>KJNi676d</td>
-                                        <td>-34.928, 138.601</td>
-                                        <td>Chris</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">12</th>
-                                        <td>Adelaide Uni 4</td>
-                                        <td>87asgdyhD</td>
-                                        <td>-34.928, 138.601</td>
-                                        <td>Chris</td>
+                                <tbody v-for="(venue, index) in venues">
+                                    <tr @click="popVenueData(venue.code);" v-on:click="profileNav = 'Venues-Clicked'">
+                                        <th scope="row">{{ index+1 }}</th>
+                                        <td>{{ venue.name }}</td>
+                                        <td>{{ venue.code  }}</td>
+                                        <td>{{ venue.latitude}}, {{ venue.longitude }}</td>
+                                        <td>{{ venue.owner }}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -637,29 +551,14 @@
                                     <tr>
                                         <th scope="col">#</th>
                                         <th scope="col">Name</th>
-                                        <th scope="col">Email</th>
+                                        <th scope="col">Date</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    <tr onclick="populateUserData('chris@gmail.com');" v-on:click="profileNav = 'Users-Clicked'">
-                                        <th scope="row">1</th>
-                                        <td>Chris</td>
-                                        <td>chris@gmail.com</td>
-                                    </tr>
+                                <tbody v-for="(checkin, index) in venueCheckins">
                                     <tr>
-                                        <th scope="row">2</th>
-                                        <td>Matt</td>
-                                        <td>matt@gmail.com</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">3</th>
-                                        <td>Chelsea</td>
-                                        <td>chelsea@gmail.com</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">4</th>
-                                        <td>Angel</td>
-                                        <td>angel@gmail.com</td>
+                                        <th scope="row">{{ index+1 }}</th>
+                                        <td>{{ checkin.user }}</td>
+                                        <td>{{ checkin.time }}</td>
                                     </tr>
                                 </tbody>
                             </table>

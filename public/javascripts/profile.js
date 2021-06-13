@@ -14,13 +14,16 @@ var userProfile = new Vue({
         activeUser: {},
         checkins: [{}],
         venues: [{}],
-        venueCheckins: [{}]
+        venueCheckins: [{}],
+        users: [{}]
     },
     methods: {
         popVenueData(venueCode) {
             populateVenueData(venueCode);
             populateVenueCheckins(venueCode);
-            console.log(userProfile.venueCheckins);
+        },
+        popUserData(email) {
+            populateUserData(email);
         }
     }
 });
@@ -86,7 +89,7 @@ function populateUserData(email) {
         }
     }
 
-    http.send(JSON.stringify({'email': email}));
+    http.send(JSON.stringify({ 'email': email, 'authEmail': userProfile.email, 'authPassword': userProfile.password}));
 }
 
 function populateUserCheckins() {
@@ -129,10 +132,50 @@ function populateUserVenues() {
     http.send(JSON.stringify({ 'email': userProfile.email }));
 }
 
+function populateUsers() {
+    let http = new XMLHttpRequest();
+    http.open("POST", "/users");
+    http.responseType = "json";
+    http.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
+
+    http.onreadystatechange = function() {
+        if (this.readyState == 4) {
+            if (this.status != 200) {
+                console.log(this.response.error);
+            }
+            else {
+                userProfile.users = this.response;
+            }
+        }
+    }
+
+    http.send(JSON.stringify({ 'email': userProfile.email, 'password': userProfile.password }));
+}
+
+function populateVenues() {
+    let http = new XMLHttpRequest();
+    http.open("POST", "/venues");
+    http.responseType = "json";
+    http.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
+
+    http.onreadystatechange = function() {
+        if (this.readyState == 4) {
+            if (this.status != 200) {
+                console.log(this.response.error);
+            }
+            else {
+                userProfile.venues = this.response;
+            }
+        }
+    }
+
+    http.send(JSON.stringify({ 'email': userProfile.email, 'password': userProfile.password }));
+}
+
 function saveUserInformation() {
     let fName = document.getElementById("firstName").value;
     let lName = document.getElementById("lastName").value;
-    let oldPassword = document.getElementById("oldPassword").value;
+    let oldPassword = document.getElementById("password").value;
     let newPassword = document.getElementById("newPassword").value;
     let email = document.getElementById("email").value;
     let accountType = document.getElementById("accountType").value;
@@ -162,7 +205,36 @@ function saveUserInformation() {
         }
     }
 
-    http.send(JSON.stringify({ 'fName': fName, 'lName': lName, 'oldPassword': oldPassword, 'newPassword': newPassword, 'email': email, 'accountType': accountType }));
+    http.send(JSON.stringify({ 'fName': fName, 'lName': lName, 'oldPassword': oldPassword, 'newPassword': newPassword, 'email': email, 'accountType': accountType, 'authEmail': email, 'authPassword': password }));
+}
+
+function saveOtherUserInformation() {
+    let fName = document.getElementById("firstName").value;
+    let lName = document.getElementById("lastName").value;
+    let oldPassword = document.getElementById("password").value;
+    let newPassword = document.getElementById("newPassword").value;
+    let email = document.getElementById("email").value;
+    let accountType = document.getElementById("accountType").value;
+
+    let http = new XMLHttpRequest();
+    http.open("POST", "/save-user");
+    http.responseType = "json";
+    http.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
+
+    http.onreadystatechange = function() {
+        if (this.readyState == 4) {
+            if (this.status != 200) {
+                console.log(this.response.error);
+            }
+            else {
+                document.getElementById("newPassword").value = "";
+                populateUsers();
+                postAlert("success", "Successfully saved!");
+            }
+        }
+    }
+
+    http.send(JSON.stringify({ 'fName': fName, 'lName': lName, 'oldPassword': oldPassword, 'newPassword': newPassword, 'email': email, 'accountType': accountType, 'authEmail': userProfile.email, 'authPassword': userProfile.password }));
 }
 
 function saveVenueInformation() {
@@ -183,6 +255,7 @@ function saveVenueInformation() {
             }
             else {
                 populateUserVenues();
+                populateVenues();
                 postAlert("success", "Successfully saved venue information!");
             }
         }

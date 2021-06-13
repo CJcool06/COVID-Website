@@ -81,6 +81,7 @@ router.post("/logout", function(req, res, next) {
 
 router.post("/loggedin", function(req, res, next) {
 	let cookie = req.body.cookie;
+
 	getLoggedInUser(cookie, (user) => {
 		if (!user) {
 			res.status(203).json({"error": "No user was found."});
@@ -97,10 +98,10 @@ router.post("/venue", function(req, res, next) {
 	getVenueDB(venueCode, (err, venues) => {
 		if (err) {
 			console.log(err);
-			return res.status(203).json({"error": "Database error."});
+			res.status(203).json({"error": "Database error."});
 		}
 		else if (venues.length <= 0) {
-			return res.status(203).json({"error": "No venue was found."});
+			res.status(203).json({"error": "No venue was found."});
 		}
 		else {
 			res.status(200).json(venues[0]);
@@ -110,15 +111,87 @@ router.post("/venue", function(req, res, next) {
 
 router.post("/user", function(req, res, next) {
 	let email = req.body.email;
+	let authEmail = req.body.authEmail;
+	let authPassword = req.body.authPassword;
 
-	for (index in users) {
-		if (users[index].email === email) {
-			res.status(200).json(users[index]);
-			return;
+	sensitiveInformationAuth(authEmail, authPassword, (authenticated) => {
+		if (!authenticated) {
+			res.status(203).json({"error": "Wrong permissions."});
 		}
-	}
+		else {
+			getUserFromEmail(email, (err, users) => {
+				if (err) {
+					console.log(err);
+					res.status(203).json({"error": "Database error."});
+				}
+				else if (users.length <= 0) {
+					res.status(203).json({"error": "No user was found."});
+				}
+				else {
+					res.status(200).json(users[0]);
+				}
+			});
+		}
+	});
+});
 
-	res.status(203).json({ "error": "No user found."});
+router.post("/users", function(req, res, next) {
+	let email = req.body.email;
+	let password = req.body.password;
+
+	sensitiveInformationAuth(email, password, (authenticated) => {
+		if (!authenticated) {
+			res.status(203).json({"error": "Wrong permissions."});
+		}
+		else {
+			getUsersDB((err, allUsers) => {
+				if (err) {
+					console.log(err);
+					res.status(203).json({"error": "Database error."});
+				}
+				else {
+					res.status(200).json(allUsers);
+				}
+			});
+		}
+	});
+});
+
+router.post("/venues", function(req, res, next) {
+	let email = req.body.email;
+	let password = req.body.password;
+
+	sensitiveInformationAuth(email, password, (authenticated) => {
+		if (!authenticated) {
+			res.status(203).json({"error": "Wrong permissions."});
+		}
+		else {
+			getVenuesDB((err, allVenues) => {
+				if (err) {
+					console.log(err);
+					res.status(203).json({"error": "Database error."});
+				}
+				else {
+					let changeNames = new Promise((resolve, reject) => {
+						let count = 0;
+						for (const index in allVenues) {
+							getUserFromIDDB(allVenues[index].owner, (err, users) => {
+								allVenues[index].owner = users[0].fName + " " + users[0].lName;
+								count++;
+								if (count == (allVenues.length)) {
+									resolve();
+								}
+							});
+						}
+					});
+		
+					changeNames.then(() => {
+						return res.status(200).json(allVenues);
+					});
+				}
+			});
+		}
+	});
 });
 
 router.post("/save-user", function(req, res) {
@@ -128,31 +201,55 @@ router.post("/save-user", function(req, res) {
     let newPassword = req.body.newPassword;
 	let email = req.body.email;
 	let accountType = req.body.accountType;
+	let authEmail = req.body.authEmail;
+	let authPassword = req.body.authPassword;
 
-	getUserFromEmail(email, (err, users) => {
-		if (err) {
-			console.log(err);
-			return res.status(203).json({"error": "Database error."});
-		}
-		else if (users.length <= 0) {
-			return res.status(203).json({"error": "No user was found."});
-		}
-		else if (users[0].password != oldPassword) {
-			return res.status(203).json({"error": "Wrong password."});
-		}
-		else {
-			updateUserDB(fName, lName, email, (newPassword == "" ? oldPassword : newPassword), accountType, (err, result) => {
-				if (err) {
-					res.status(203).json({"error": "No user was found."});
-				}
-				else {
-					getUserFromEmail(email, (err, users) => {
-						res.status(200).json(users[0]);
-					});
-				}
-			});
-		}
-	});
+	// No auth needed, the user is submitting this request
+	if (authEmail == email && authPassword == password) {
+		getUserFromEmail(email, (err, users) => {
+			if (err) {
+				console.log(err);
+				return res.status(203).json({"error": "Database error."});
+			}
+			else if (users.length <= 0) {
+				return res.status(203).json({"error": "No user was found."});
+			}
+			else if (users[0].password != oldPassword) {
+				return res.status(203).json({"error": "Wrong password."});
+			}
+			else {
+				updateUserDB(fName, lName, email, (newPassword == "" ? oldPassword : newPassword), accountType, (err, result) => {
+					if (err) {
+						res.status(203).json({"error": "No user was found."});
+					}
+					else {
+						getUserFromEmail(email, (err, users) => {
+							res.status(200).json(users[0]);
+						});
+					}
+				});
+			}
+		});
+	}
+	else {
+		sensitiveInformationAuth(authEmail, authPassword, (authenticated) => {
+			if (!authenticated) {
+				res.status(203).json({"error": "Wrong permissions."});
+			}
+			else {
+				updateUserDB(fName, lName, email, (newPassword == "" ? oldPassword : newPassword), accountType, (err, result) => {
+					if (err) {
+						res.status(203).json({"error": "No user was found."});
+					}
+					else {
+						getUserFromEmail(email, (err, users) => {
+							res.status(200).json(users[0]);
+						});
+					}
+				});
+			}
+		});
+	}
 });
 
 router.post("/save-venue", function(req, res) {
@@ -175,14 +272,30 @@ router.post("/save-venue", function(req, res) {
 			return res.status(203).json({"error": "Wrong password."});
 		}
 		else {
-			updateVenueDB(code, name, latitude, longitude, (err, result) => {
+			getVenueDB(code, (err, venues) => {
 				if (err) {
+					console.log(err);
+					res.status(203).json({"error": "Database error."});
+				}
+				else if (venues.length <= 0) {
 					res.status(203).json({"error": "No venue was found."});
 				}
 				else {
-					updateVenueInCheckinsDB(code, name, (error, result) => {
-						res.sendStatus(200);
-					});
+					if (venues[0].owner != users[0].id && users[0].accountType != "officer") {
+						res.status(203).json({"error": "Wrong permissions."});
+					}
+					else {
+						updateVenueDB(code, name, latitude, longitude, (err, result) => {
+							if (err) {
+								res.status(203).json({"error": "No venue was found."});
+							}
+							else {
+								updateVenueInCheckinsDB(code, name, (error, result) => {
+									res.sendStatus(200);
+								});
+							}
+						});
+					}
 				}
 			});
 		}
@@ -250,10 +363,12 @@ router.post("/venue/checkins", function(req, res, next) {
 		}
 		else {
 			let changeNames = new Promise((resolve, reject) => {
+				let count = 0;
 				for (const index in checkins) {
 					getUserFromIDDB(checkins[index].user, (err, users) => {
 						checkins[index].user = users[0].fName + " " + users[0].lName;
-						if (index == (checkins.length-1)) {
+						count++;
+						if (count == (checkins.length)) {
 							resolve();
 						}
 					});
@@ -314,6 +429,29 @@ function getLoggedInUserIndex(cookie, callback) {
 	}
 }
 
+function sensitiveInformationAuth(email, password, callback) {
+	getUserFromEmail(email, (err, users) => {
+		if (err) {
+			console.log(err);
+			callback(false);
+		}
+		else if (users.length <= 0) {
+			callback(false);
+		}
+		else if (users[0].password != password) {
+			callback(false);
+		}
+		else {
+			if (users[0].accountType != "official") {
+				callback(false);
+			}
+			else {
+				callback(true);
+			}
+		}
+	});
+}
+
 
 /* DATABASE QUERIES */
 
@@ -324,6 +462,21 @@ const pool = mysql.createPool({
 	password: "Cocoplop2",
 	database: "covidw"
 });
+
+function getUsersDB(callback) {
+	pool.getConnection((err, con) => {
+		if (err) {
+			return callback(err, null);
+		}
+		con.query("SELECT * FROM users", (err, users) => {
+			if (err) {
+				return callback(err, null);
+			}
+			return callback(null, users);
+		});
+		con.release();
+	});
+}
 
 function getUserFromEmail(email, callback) {
 	pool.getConnection((err, con) => {
@@ -350,6 +503,21 @@ function getUserFromIDDB(id, callback) {
 				return callback(err, null);
 			}
 			return callback(null, users);
+		});
+		con.release();
+	});
+}
+
+function getVenuesDB(callback) {
+	pool.getConnection((err, con) => {
+		if (err) {
+			return callback(err, null);
+		}
+		con.query("SELECT * FROM venues", (err, venues) => {
+			if (err) {
+				return callback(err, null);
+			}
+			return callback(null, venues);
 		});
 		con.release();
 	});
