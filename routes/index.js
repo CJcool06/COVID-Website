@@ -9,7 +9,7 @@ router.get('/', function(req, res, next) {
 });
 
 /* GET map page. */
-router.get('/map', function(req, res, next) {
+router.get('/hotspots', function(req, res, next) {
   	res.sendFile('map.html', { root: __dirname + '/../public/' } );
 });
 

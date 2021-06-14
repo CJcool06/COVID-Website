@@ -32,7 +32,7 @@
                                 <a class="nav-link" href="/">Home</a>
                             </li>
                             <li class="nav-item nav-middle">
-                                <a class="nav-link" href="/map">Map</a>
+                                <a class="nav-link" href="/hotspots">Hotspots</a>
                             </li>
                             <li class="nav-item nav-middle">
                                 <a class="nav-link" href="/information">COVID-19 Information</a>
@@ -46,10 +46,10 @@
                         </ul>
                         <ul v-if="!loggedIn" class="navbar-nav">
                             <li>
-                                <button class="btn btn-outline-success" type="submit" onclick="login();">Login</button>
+                                <button class="btn btn-outline-success" type="submit" onclick="location.replace('/login');">Login</button>
                             </li>
                             <li>
-                                <button class="btn btn-outline-primary btn-middle" type="submit">Sign Up!</button>
+                                <button class="btn btn-outline-primary btn-middle" type="submit" onclick="location.replace('/signup');">Sign Up!</button>
                             </li>
                         </ul>
                         <ul v-else class="navbar-nav">
