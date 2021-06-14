@@ -512,7 +512,7 @@ function removeUser() {
         }
 
         http.send(JSON.stringify({ 'email': email, 'authEmail': userProfile.email, 'authPassword': userProfile.password }));
-        document.getElementById("userEmail").value = "";
+        document.getElementById("usersEmail").value = "";
     }
 }
 

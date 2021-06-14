@@ -15,9 +15,8 @@ var nav = new Vue({
 
 function login() {
     // For testing
-    let email = "chris@gmail.com";
-    let password = "12345";
-    let cookie = "999";
+    let email = document.getElementById('login-email').value;
+    let password = document.getElementById('login-password').value;
 
     let http = new XMLHttpRequest();
     http.open("POST", "/login");
@@ -39,20 +38,19 @@ function login() {
                 nav.loggedIn = true;
                 nav.name = this.response.fName;
                 nav.accountType = this.response.accountType;
+
+                // Redirect back to main page... I wish the login page was made better so I didn't have to do this!
+                window.location.replace('/');
             }
         }
     }
 
-    http.send(JSON.stringify({'email': email, 'password': password, 'cookie': cookie}));
+    http.send(JSON.stringify({ 'email': email, 'password': password }));
 }
 
 function logout() {
-    let cookie = "999";
-
     let http = new XMLHttpRequest();
-    http.open("POST", "/logout");
     http.responseType = "json";
-    http.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
 
     http.onreadystatechange = function() {
         if (this.readyState == 4) {
@@ -73,16 +71,13 @@ function logout() {
         }
     }
 
-    http.send(JSON.stringify({'cookie': cookie}));
+    http.open("GET", "/logout");
+    http.send();
 }
 
 function loadUser() {
-    let cookie = "999";
-
     var http = new XMLHttpRequest();
-    http.open("POST", "/loggedin");
     http.responseType = "json";
-    http.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
 
     http.onreadystatechange = function() {
         if (this.readyState == 4) {
@@ -103,5 +98,6 @@ function loadUser() {
         }
     }
 
-    http.send(JSON.stringify({'cookie': cookie}));
+    http.open("GET", "/loggedin");
+    http.send();
 }

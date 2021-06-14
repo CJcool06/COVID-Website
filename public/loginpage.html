@@ -1,0 +1,50 @@
+
+<!-- 
+    DISCLAIMER:
+    THIS IS NOT MY WORK!
+    
+    - CHRIS
+-->
+
+<html>
+    <head>
+        <title>Login</title>
+        <link rel="stylesheet" href="stylesheets/STYLE.css">
+
+        <!-- Added Vue and other scripts to make this actually work with the rest of the website (sigh) - Chris -->
+        <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
+        <script src="javascripts/navbar.js"></script>
+        <script src="javascripts/profile.js"></script>
+    </head>
+    <body>
+        <form action="/login" method="POST" >
+
+            <!-- I removed the username requirement to login because it DOESN'T MAKE SENSE to need a username and an email to login!!!! -->
+
+                <!-- <label>Username</label><br>
+                <input id="login-username" type="text" name="username"><br> -->
+
+            <!-- - Chris -->
+
+            <label>Email</label><br>
+            <input id="login-email" type="email" name="email"><br>
+            <label>Password</label><br>
+            <input id="login-password" type="password" name="password"><br>
+
+            <!-- I removed this for the same reason! -->
+
+                <!-- <select id="login-identity">
+                    <option value = "Normaluser">Normal User</option>
+                    <option value = "Manager">Manager</option>
+                    <option value = "HealthOffical">Health Offical</option>
+                </select> -->
+
+            <!-- - Chris -->
+
+            <button id="login-submit" type="button" onclick="login()">submit</button>
+        </form>
+    <script src="javascripts/login.js"></script>
+    </body>
+</html>
+
+

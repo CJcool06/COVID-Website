@@ -33,12 +33,57 @@ router.get('/privacy_policy', function(req, res, next) {
 	res.sendFile('privacy_policy.html', { root: __dirname + '/../public/' } );
 });
 
+/* GET login page. */
+router.get('/login', function(req, res, next) {
+	res.sendFile('loginpage.html', { root: __dirname + '/../public/' } );
+});
+
+/* GET signup page. */
+router.get('/signup', function(req, res, next) {
+	res.sendFile('signuppage.html', { root: __dirname + '/../public/' } );
+});
+
 
 /* LOGIN HANDLING */
 
 // For testing
 // var account = {'id': 0, 'fName': 'Person', 'lName': "Smith", 'email': 'chris@gmail.com', 'password': '12345', 'accountType': "normal"};
-var loggedIn = [{}];
+var loggedIn = [{}]
+
+/**
+ * Signs a user up.
+ */
+ router.post("/signup", function(req, res, next) {
+	let fName = req.body.fName;
+	let lName = req.body.fName;
+    let email = req.body.email;
+    let password = req.body.password;
+	let accountType = req.body.accountType;
+
+	getUserFromEmailDB(email, (err, users) => {
+		if (err) {
+			console.log(err);
+			return res.status(203).json({"error": "Database error."});
+		}
+		else if (users.length > 0) {
+			return res.status(203).json({"error": "A user with that email already exists."});
+		}
+		else if (accountType == "official") {
+			return res.status(203).json({"error": "You are not allowed to select that account type."});
+		}
+		else {
+			addUserDB(fName, lName, email, password, accountType, (err, result) => {
+				if (err) {
+					console.log(err);
+					return res.status(203).json({"error": "Database error."});
+				}
+				else {
+					res.sendStatus(200);
+				}
+			})
+		}
+	});
+});
 
 /**
  * Logs a user into the server and stores their cookie for future page loads.
@@ -46,7 +91,6 @@ var loggedIn = [{}];
 router.post("/login", function(req, res, next) {
     let email = req.body.email;
     let password = req.body.password;
-	let cookie = req.body.cookie;
 
 	getUserFromEmailDB(email, (err, users) => {
 		if (err) {
@@ -60,7 +104,8 @@ router.post("/login", function(req, res, next) {
 			res.status(203).json({"error": "Incorrect password."});
 		}
 		else {
-			res.status(200).json(users[0]);
+			let cookie = genCookieNumber();
+			res.status(200).cookie('client', cookie, { maxAge: 900000, httpOnly: true }).json(users[0]);
 			loggedIn.push({ "cookie": cookie, "email": email });
 		}
 	});
@@ -69,8 +114,8 @@ router.post("/login", function(req, res, next) {
 /**
  * Logs a user out.
  */
-router.post("/logout", function(req, res, next) {
-	let cookie = req.body.cookie;
+router.get("/logout", function(req, res, next) {
+	let cookie = req.cookies['client'];
 
 	getLoggedInUserIndex(cookie, (index) => {
 		if (!index) {
@@ -78,6 +123,7 @@ router.post("/logout", function(req, res, next) {
 		}
 		else {
 			loggedIn.splice(index, 1);
+			res.clearCookie('client');
 			res.sendStatus(200);
 		}
 	});
@@ -86,8 +132,8 @@ router.post("/logout", function(req, res, next) {
 /**
  * Checks whether a user is logged in.
  */
-router.post("/loggedin", function(req, res, next) {
-	let cookie = req.body.cookie;
+router.get("/loggedin", function(req, res, next) {
+	let cookie = req.cookies['client'];
 
 	getLoggedInUser(cookie, (user) => {
 		if (!user) {
@@ -610,43 +656,41 @@ router.post("/venue/remove", function(req, res, next) {
 	console.log(code);
 
 	sensitiveInformationAuth(email, password, (authenticated) => {
-		if (!authenticated) {
-			res.status(203).json({"error": "Wrong permissions."});
-		}
-		else {
-			getUserFromEmailDB(email, (err, users) => {
-				if (err) {
-					console.log(err);
-					return res.status(203).json({"error": "Database error."});
-				}
-				else if (users.length <= 0) {
-					return res.status(203).json({"error": "No user was found with that code."});
-				}
-				else {
-					getVenueFromCodeDB(code, (err, venues) => {
-						if (err) {
-							return res.status(203).json({"error": "Problem getting user's venues."});
-						}
-						else if (venues.length <= 0) {
-							return res.status(203).json({"error": "No venue found with that code."});
-						}
-						else {
-							removeVenueDB(code, (err, result) => {
-								if (err) {
-									console.log(err);
-									return res.status(203).json({"error": "Database error."});
-								}
-								else {
-									removeVenueInHotspotsDB(code, (err, result) => {
-										res.sendStatus(200);
-									});
-								}
-							});
-						}
-					});
-				}
-			});
-		}
+		getUserFromEmailDB(email, (err, users) => {
+			if (err) {
+				console.log(err);
+				return res.status(203).json({"error": "Database error."});
+			}
+			else if (users.length <= 0) {
+				return res.status(203).json({"error": "No user was found with that code."});
+			}
+			if (!authenticated && users[0].password != password) {
+				res.status(203).json({"error": "Wrong permissions."});
+			}
+			else {
+				getVenueFromCodeDB(code, (err, venues) => {
+					if (err) {
+						return res.status(203).json({"error": "Problem getting user's venues."});
+					}
+					else if (venues.length <= 0) {
+						return res.status(203).json({"error": "No venue found with that code."});
+					}
+					else {
+						removeVenueDB(code, (err, result) => {
+							if (err) {
+								console.log(err);
+								return res.status(203).json({"error": "Database error."});
+							}
+							else {
+								removeVenueInHotspotsDB(code, (err, result) => {
+									res.sendStatus(200);
+								});
+							}
+						});
+					}
+				});
+			}
+		});
 	});
 });
 
@@ -764,85 +808,6 @@ router.post("/user/remove", function(req, res, next) {
 		}
 	});
 });
-
-/**
- * Utility function for checking if a user is logged in from their cookie.
-*/
-function getLoggedInUser(cookie, callback) {
-	let promise = new Promise((resolve, reject) => {
-		let count = 0;
-		for (const index in loggedIn) {
-			getUserFromEmailDB(loggedIn[index].email, (err, users) => {
-				if (!err && users.length > 0) {
-					resolve(users[0]);
-				}
-				else {
-					count++;
-					if (count == (loggedIn.length)) {
-						resolve(null);
-					}
-				}
-			});
-		}
-	});
-
-	promise.then((user) => {
-		return callback(user);
-	});
-}
-
-/**
- * Utility function for getting the id of a logged in user from their cookie.
-*/
-function getLoggedInUserIndex(cookie, callback) {
-	let promise = new Promise((resolve, reject) => {
-		let count = 0;
-		for (const index in loggedIn) {
-			getUserFromEmailDB(loggedIn[index].email, (err, users) => {
-				if (!err && users.length > 0) {
-					resolve(index);
-				}
-				else {
-					count++;
-					if (count == (loggedIn.length)) {
-						resolve(null);
-					}
-				}
-			});
-		}
-	});
-
-	promise.then((index) => {
-		return callback(index);
-	});
-}
-
-/**
- * Authenticates the password and account type for sensitive information.
- * Only official accounts pass this authentication with a correct password.
- */
-function sensitiveInformationAuth(email, password, callback) {
-	getUserFromEmailDB(email, (err, users) => {
-		if (err) {
-			console.log(err);
-			callback(false);
-		}
-		else if (users.length <= 0) {
-			callback(false);
-		}
-		else if (users[0].password != password) {
-			callback(false);
-		}
-		else {
-			if (users[0].accountType != "official") {
-				callback(false);
-			}
-			else {
-				callback(true);
-			}
-		}
-	});
-}
 
 
 /* DATABASE QUERIES */
@@ -1227,6 +1192,31 @@ function addVenueDB(ownerID, venueName, venueCode, latitude, longitude, callback
 	});
 }
 
+function addUserDB(fName, lName, email, password, accountType, callback) {
+	pool.getConnection((err, con) => {
+		if (err) {
+			return callback(err, null);
+		}
+		con.query('SELECT MAX(id) as maxID FROM users', (err, maxQ) => {
+            if (err) {
+                callback(err, null);
+            }
+            else {
+                con.query('INSERT INTO users VALUES(' + (maxQ[0].maxID + 1) + ',\'' + fName + '\',\'' + lName + '\',\'' + email + '\',\'' + password + '\',\'' + accountType + '\')', (err, result) => {
+                    if (err) {
+                        console.log(err);
+                        callback(err, null);
+                    }
+                    else {
+                        callback(null, result);
+                    }
+                });
+            }
+        });
+        con.release();
+	});
+}
+
 /**
  * Remove a venue from the database.
  * 
@@ -1352,6 +1342,100 @@ function removeUsersVenuesDB(userID, callback) {
 			}
 		});
         con.release();
+	});
+}
+
+/**
+ * Generates a random number for a cookie.
+ */
+function genCookieNumber() {
+	var randomNumber = Math.random().toString();
+    randomNumber = randomNumber.substring(2, randomNumber.length);
+	return randomNumber;
+}
+
+/**
+ * Utility function for checking if a user is logged in from their cookie.
+*/
+function getLoggedInUser(cookie, callback) {
+	let promise = new Promise((resolve, reject) => {
+		let count = 0;
+		for (const index in loggedIn) {
+			if (loggedIn[index].cookie === cookie) {
+				getUserFromEmailDB(loggedIn[index].email, (err, users) => {
+					if (!err && users.length > 0) {
+						resolve(users[0]);
+					}
+					else {
+						count++;
+						if (count == (loggedIn.length)) {
+							resolve(null);
+						}
+					}
+				});
+			}
+			else {
+				count++;
+				if (count == (loggedIn.length)) {
+					resolve(null);
+				}
+			}
+		}
+	});
+
+	promise.then((user) => {
+		return callback(user);
+	});
+}
+
+/**
+ * Utility function for getting the id of a logged in user from their cookie.
+*/
+function getLoggedInUserIndex(cookie, callback) {
+	let promise = new Promise((resolve, reject) => {
+		let count = 0;
+		for (const index in loggedIn) {
+			if (loggedIn[index].cookie === cookie) {
+				resolve(index);
+			}
+			else {
+				count++;
+				if (count == (loggedIn.length)) {
+					resolve(null);
+				}
+			}
+		}
+	});
+
+	promise.then((index) => {
+		return callback(index);
+	});
+}
+
+/**
+ * Authenticates the password and account type for sensitive information.
+ * Only official accounts pass this authentication with a correct password.
+ */
+function sensitiveInformationAuth(email, password, callback) {
+	getUserFromEmailDB(email, (err, users) => {
+		if (err) {
+			console.log(err);
+			callback(false);
+		}
+		else if (users.length <= 0) {
+			callback(false);
+		}
+		else if (users[0].password != password) {
+			callback(false);
+		}
+		else {
+			if (users[0].accountType != "official") {
+				callback(false);
+			}
+			else {
+				callback(true);
+			}
+		}
 	});
 }
 

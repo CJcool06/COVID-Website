@@ -1,0 +1,41 @@
+
+<!-- 
+    DISCLAIMER:
+    THIS IS NOT MY WORK!
+    
+    - CHRIS
+-->
+
+<html>
+    <head>
+        <title>signup</title>
+        <link rel="stylesheet" href="stylesheets/STYLE.css">
+
+    </head>
+    <body>
+        <form action="/signup" method="POST" >
+            <!-- I had to add the email to the signup page... As if it's not a requirement! And also the first name -->
+
+            <label>First Name</label><br>
+            <input id="signup-fname" type="text" name="text"><br>
+            <label>Last Name</label><br>
+            <input id="signup-lname" type="text" name="text"><br>
+            <label>Email</label><br>
+            <input id="signup-email" type="email" name="email"><br>
+
+            <!-- - Chris -->
+
+            <label>Password</label><br>
+            <input id="signup-password" type="password" name="password"><br>
+            <select id="signup-identity">
+                <option value = "normal">Normal User</option>
+
+                <!-- Changed this to reflect correct value - Chris -->
+                <option value = "venueOwner">Venue Owner</option>
+                
+            </select>
+            <button id="signup-submit" type="button" onclick="signup()">submit</button>
+        </form>
+    <script src="javascripts/signup.js"></script>
+    </body>
+</html>
