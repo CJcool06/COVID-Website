@@ -1,3 +1,8 @@
-# COVID-Website
+# CODID-WEBSITE
 
-We'll put an explanation here.
+npm install
+
+Database:
+name: covidw
+user: root
+password: password
