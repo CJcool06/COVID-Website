@@ -26,7 +26,10 @@
 
             <nav class="navbar navbar-expand-lg navbar-light bg-light" id="nav">
                 <div class="container-fluid">
-                    <div class="collapse navbar-collapse justify-content-center" id="navbarResponsive">
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse justify-content-center" id="navbarNavDropdown">
                         <ul class="navbar-nav me-auto">
                             <li class="nav-item nav-middle">
                                 <a class="nav-link" href="/">Home</a>
@@ -188,7 +191,7 @@
                             <h1>Check-In</h1>
                             <hr>
                             <div class="row mb-3">
-                                <label for="checkinCode" class="form-label">Venue Code</label>
+                                <label for="checkinCode" class="form-label">Check-In to a Venue</label>
                                 <div class="col-3">
                                     <input type="text" class="form-control" id="checkinCode" placeholder="Enter a venue's code">
                                 </div>
