@@ -2,6 +2,9 @@
 
 <html lang="en">
 
+
+    <!-- Head -->
+
     <head>
         <title>Profile</title>
 
@@ -20,10 +23,14 @@
         <script src="javascripts/profile.js" defer></script>
     </head>
 
+
+    <!-- Body -->
+
     <body>
 
         <div>
 
+            <!-- Main Navbar -->
             <nav class="navbar navbar-expand-lg navbar-light bg-light" id="nav">
                 <div class="container-fluid">
                     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
@@ -77,6 +84,8 @@
             </nav>
 
             <div class="row" id="user">
+
+                <!-- Side Navbar -->
                 <div class="col-sm-2">
                     <div class="d-flex flex-column flex-shrink-0 p-3 bg-light">
                         <!-- <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-dark text-decoration-none">
@@ -148,7 +157,12 @@
                         </ul>
                     </div>
                 </div>
+
                 <div class="col-sm-10">
+
+
+                    <!-- Information Page -->
+
                     <div v-if="profileNav == '' || profileNav == 'Information'" class="container-fluid">
                         <form>
                             <h1>Personal Details</h1>
@@ -186,6 +200,10 @@
                             <div id="alerts" class="d-flex align-items-center justify-content-center col-4"></div>
                         </form>
                     </div>
+
+
+                    <!-- Check-In Page -->
+
                     <div v-else-if="profileNav == 'Check-In'" class="container-fluid">
                         <form>
                             <h1>Check-In</h1>
@@ -228,6 +246,10 @@
                             </table>
                         </div>
                     </div>
+
+
+                    <!-- My-Venues Page -->
+
                     <div v-else-if="profileNav == 'My-Venues' || profileNav == 'My-Venues-Clicked'" class="container-fluid">
                         <h1>My Venues</h1>
                         <hr>
@@ -328,6 +350,10 @@
                             </table>
                         </div>
                     </div>
+
+
+                    <!-- Hotspots Page -->
+
                     <div v-else-if="profileNav == 'Hotspots' || profileNav == 'Hotspots-Clicked'" class="container-fluid">
                         <h1>Manage Hotspots</h1>
                         <hr>
@@ -416,6 +442,10 @@
                             </table>
                         </div>
                     </div>
+
+
+                    <!-- Users Page -->
+
                     <div v-else-if="profileNav == 'Users' || profileNav == 'Users-Clicked'" class="container-fluid">
                         <h1>Manage Users</h1>
                         <hr>
@@ -505,6 +535,10 @@
                             </form>
                         </div>
                     </div>
+
+
+                    <!-- Venues Page -->
+
                     <div v-else-if="profileNav == 'Venues' || profileNav == 'Venues-Clicked'" class="container-fluid">
                         <h1>Manage Venues</h1>
                         <hr>
@@ -605,6 +639,10 @@
                             </table>
                         </div>
                     </div>
+
+
+                    <!-- Invite Page -->
+
                     <div v-else-if="profileNav == 'Invite'" class="container-fluid">
                         <h1>Invite Others</h1>
                         <hr>
@@ -621,12 +659,16 @@
                         </form>
                         <div id="alerts" class="d-flex align-items-center justify-content-center"></div>
                     </div>
+
+
+                    <!-- This page is to tell me if something went wrong with how I processed my vue elements -->
                     <div v-else class="container-fluid">
                         <h5>You're not supposed to be here...</h5>
                     </div>
+
+
                 </div>
             </div>
-
 
 
         </div>
