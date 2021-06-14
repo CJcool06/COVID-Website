@@ -47,7 +47,7 @@ router.post("/login", function(req, res, next) {
     let password = req.body.password;
 	let cookie = req.body.cookie;
 
-	getUserFromEmail(email, (err, users) => {
+	getUserFromEmailDB(email, (err, users) => {
 		if (err) {
 			console.log(err);
 			return res.status(203).json({"error": "Database error."});
@@ -119,7 +119,7 @@ router.post("/user", function(req, res, next) {
 			res.status(203).json({"error": "Wrong permissions."});
 		}
 		else {
-			getUserFromEmail(email, (err, users) => {
+			getUserFromEmailDB(email, (err, users) => {
 				if (err) {
 					console.log(err);
 					res.status(203).json({"error": "Database error."});
@@ -206,7 +206,7 @@ router.post("/save-user", function(req, res) {
 
 	// No auth needed, the user is submitting this request
 	if ((authEmail === email) && (authPassword === oldPassword)) {
-		getUserFromEmail(email, (err, users) => {
+		getUserFromEmailDB(email, (err, users) => {
 			if (err) {
 				console.log(err);
 				return res.status(203).json({"error": "Database error."});
@@ -223,7 +223,7 @@ router.post("/save-user", function(req, res) {
 						res.status(203).json({"error": "No user was found."});
 					}
 					else {
-						getUserFromEmail(email, (err, users) => {
+						getUserFromEmailDB(email, (err, users) => {
 							res.status(200).json(users[0]);
 						});
 					}
@@ -242,7 +242,7 @@ router.post("/save-user", function(req, res) {
 						res.status(203).json({"error": "No user was found."});
 					}
 					else {
-						getUserFromEmail(email, (err, users) => {
+						getUserFromEmailDB(email, (err, users) => {
 							res.status(200).json(users[0]);
 						});
 					}
@@ -260,7 +260,7 @@ router.post("/save-venue", function(req, res) {
 	let userEmail = req.body.userEmail;
 	let userPassword = req.body.userPassword;
 
-	getUserFromEmail(userEmail, (err, users) => {
+	getUserFromEmailDB(userEmail, (err, users) => {
 		if (err) {
 			console.log(err);
 			return res.status(203).json({"error": "Database error."});
@@ -305,7 +305,7 @@ router.post("/save-venue", function(req, res) {
 router.post("/user/checkins", function(req, res, next) {
 	let email = req.body.email;
 
-	getUserFromEmail(email, (err, users) => {
+	getUserFromEmailDB(email, (err, users) => {
 		if (err) {
 			console.log(err);
 			return res.status(203).json({"error": "Database error."});
@@ -345,7 +345,7 @@ router.post("/user/checkins", function(req, res, next) {
 router.post("/user/venues", function(req, res, next) {
 	let email = req.body.email;
 
-	getUserFromEmail(email, (err, users) => {
+	getUserFromEmailDB(email, (err, users) => {
 		if (err) {
 			console.log(err);
 			return res.status(203).json({"error": "Database error."});
@@ -437,13 +437,53 @@ router.post("/hotspots", function(req, res, next) {
 	});
 });
 
+router.post("/user/check-in", function(req, res, next) {
+	let code = req.body.venueCode;
+	let email = req.body.userEmail;
+	let password = req.body.userPassword;
+
+	getUserFromEmailDB(email, (err, users) => {
+		if (err) {
+			console.log(err);
+			return res.status(203).json({"error": "Database error."});
+		}
+		else if (users.length <= 0) {
+			return res.status(203).json({"error": "No user was found."});
+		}
+		else if (users[0].password != password) {
+			return res.status(203).json({"error": "Incorrect password."});
+		}
+		else {
+			getVenueDB(code, (err, venues) => {
+				if (err) {
+					return res.status(203).json({"error": "Problem getting user's venues."})
+				}
+				else if (venues.length <= 0) {
+					return res.status(203).json({"error": "No venue found with that code."})
+				}
+				else {
+					addCheckin(users[0].id, venues[0].name, venues[0].code, new Date().toISOString().slice(0, 19).replace('T', ' '), (err, result) => {
+						if (err) {
+							console.log(err);
+							return res.status(203).json({"error": "Database error."});
+						}
+						else {
+							return res.sendStatus(200);
+						}
+					});
+				}
+			})
+		}
+	});
+});
+
 
 function getLoggedInUser(cookie, callback) {
 	let found = false;
 	for (const index in loggedIn) {
 		if (loggedIn[index].cookie == cookie) {
 			found  = true;
-			getUserFromEmail(loggedIn[index].email, (err, users) => {
+			getUserFromEmailDB(loggedIn[index].email, (err, users) => {
 				if (err) {
 					console.log(err);
 					return callback(null);
@@ -468,7 +508,7 @@ function getLoggedInUserIndex(cookie, callback) {
 	for (const index in loggedIn) {
 		if (loggedIn[index].cookie == cookie) {
 			found  = true;
-			getUserFromEmail(loggedIn[index].email, (err, users) => {
+			getUserFromEmailDB(loggedIn[index].email, (err, users) => {
 				if (err) {
 					console.log(err);
 					return callback(null);
@@ -487,7 +527,7 @@ function getLoggedInUserIndex(cookie, callback) {
 }
 
 function sensitiveInformationAuth(email, password, callback) {
-	getUserFromEmail(email, (err, users) => {
+	getUserFromEmailDB(email, (err, users) => {
 		if (err) {
 			console.log(err);
 			callback(false);
@@ -535,7 +575,7 @@ function getUsersDB(callback) {
 	});
 }
 
-function getUserFromEmail(email, callback) {
+function getUserFromEmailDB(email, callback) {
 	pool.getConnection((err, con) => {
 		if (err) {
 			return callback(err, null);
@@ -697,6 +737,32 @@ function getHotspotsDB(callback) {
 			return callback(null, hotspots);
 		});
 		con.release();
+	});
+}
+
+function addCheckin(userID, venueName, venueCode, time, callback) {
+	pool.getConnection((err, con) => {
+		if (err) {
+			return callback(err, null);
+		}
+		con.query('SELECT MAX(id) as maxID FROM checkins', (err, maxQ) => {
+            if (err) {
+                callback(err, null);
+            }
+            else {
+                con.query('INSERT INTO checkins VALUES(' + (maxQ[0].maxID + 1) + ',' + userID + ',\'' + venueName + '\',\'' + venueCode + '\',\'' + time + '\')', (err, result) => {
+                    if (err) {
+                        console.log(err);
+                        callback(err, null);
+                    }
+                    else {
+                        console.log(result);
+                        callback(null, result);
+                    }
+                });
+            }
+        });
+        con.release();
 	});
 }
 

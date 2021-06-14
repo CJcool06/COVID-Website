@@ -190,13 +190,16 @@
                         <form>
                             <h1>Check-In</h1>
                             <hr>
-                            <div class="row mb-3">
+                            <div class="row mb-3" style="height: 70px;">
                                 <label for="checkinCode" class="form-label">Check-In to a Venue</label>
                                 <div class="col-3">
                                     <input type="text" class="form-control" id="checkinCode" placeholder="Enter a venue's code">
                                 </div>
                                 <div class="col-3">
-                                    <button id="checkinButton" type="submit" class="btn btn-primary" onclick="setTimeout(unclickButton('checkinButton'), 250);">Check-In</button>
+                                    <button id="checkinButton" type="submit" class="btn btn-primary" onclick="setTimeout(unclickButton('checkinButton'), 250); doCheckIn();">Check-In</button>
+                                </div>
+                                <div class="col-4">
+                                    <div id="alerts" class="d-flex align-items-center justify-content-center"></div>
                                 </div>
                             </div>
                         </form>

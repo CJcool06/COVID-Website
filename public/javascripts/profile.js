@@ -286,7 +286,31 @@ function saveVenueInformation() {
     http.send(JSON.stringify({ 'code': code, 'name': name, 'latitude': latitude, 'longitude': longitude, 'userEmail': userProfile.email, 'userPassword': userProfile.password }));
 }
 
+function doCheckIn() {
+    let code = document.getElementById("checkinCode").value;
 
+    if (code != "") {
+        let http = new XMLHttpRequest();
+        http.open("POST", "/user/check-in");
+        http.responseType = "json";
+        http.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
+
+        http.onreadystatechange = function() {
+            if (this.readyState == 4) {
+                if (this.status != 200) {
+                    console.log(this.response.error);
+                }
+                else {
+                    populateUserCheckins();
+                    postAlert("success", "Successfully checked in to the venue!");
+                }
+            }
+        }
+
+        http.send(JSON.stringify({ 'venueCode': code, 'userEmail': userProfile.email, 'userPassword': userProfile.password }));
+        document.getElementById("checkinCode").value = "";
+    }
+}
 
 
 
