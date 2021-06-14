@@ -478,6 +478,40 @@ router.post("/hotspots", function(req, res, next) {
 });
 
 /**
+ * Get the hotspots with non-sensitive information for use with the map.
+ * 
+ * Due to not having sensitive information, no authentication is required.
+ */
+router.get("/hotspots/map", function(req, res, next) {
+	getHotspotsDB((err, allHotspots) => {
+		if (err) {
+			console.log(err);
+			res.status(203).json({"error": "Database error."});
+		}
+		else {
+			let changeNames = new Promise((resolve, reject) => {
+				let count = 0;
+				for (const index in allHotspots) {
+					getVenueFromCodeDB(allHotspots[index].venue, (err, venues) => {
+						allHotspots[index].name = venues[0].name;
+						allHotspots[index].location = { lat: venues[0].latitude, lng: venues[0].longitude };
+						allHotspots[index].since = new Date(allHotspots[index].since).toISOString().replace("T", " ").replace(".000Z", "");
+						count++;
+						if (count == (allHotspots.length)) {
+							resolve();
+						}
+					});
+				}
+			});
+
+			changeNames.then(() => {
+				return res.status(200).json(allHotspots);
+			});
+		}
+	});
+});
+
+/**
  * Submit a check-in for a user.
  */
 router.post("/user/check-in", function(req, res, next) {
@@ -633,7 +667,7 @@ router.post("/hotspots/add", function(req, res, next) {
 				if (err) {
 					return res.status(203).json({"error": "Problem getting user's venues."});
 				}
-				else if (venues.length > 0) {
+				else if (hotspots.length > 0) {
 					return res.status(203).json({"error": "That hotspot already exists."});
 				}
 				else {
@@ -735,54 +769,52 @@ router.post("/user/remove", function(req, res, next) {
  * Utility function for checking if a user is logged in from their cookie.
 */
 function getLoggedInUser(cookie, callback) {
-	let found = false;
-	for (const index in loggedIn) {
-		if (loggedIn[index].cookie == cookie) {
-			found  = true;
+	let promise = new Promise((resolve, reject) => {
+		let count = 0;
+		for (const index in loggedIn) {
 			getUserFromEmailDB(loggedIn[index].email, (err, users) => {
-				if (err) {
-					console.log(err);
-					return callback(null);
-				}
-				else if (users.length <= 0) {
-					return callback(null);
+				if (!err && users.length > 0) {
+					resolve(users[0]);
 				}
 				else {
-					return callback(users[0]);
+					count++;
+					if (count == (loggedIn.length)) {
+						resolve(null);
+					}
 				}
 			});
 		}
-	}
+	});
 
-	if (!found) {
-		return callback(null);
-	}
+	promise.then((user) => {
+		return callback(user);
+	});
 }
 
 /**
  * Utility function for getting the id of a logged in user from their cookie.
 */
 function getLoggedInUserIndex(cookie, callback) {
-	let found = false;
-	for (const index in loggedIn) {
-		if (loggedIn[index].cookie == cookie) {
-			found  = true;
+	let promise = new Promise((resolve, reject) => {
+		let count = 0;
+		for (const index in loggedIn) {
 			getUserFromEmailDB(loggedIn[index].email, (err, users) => {
-				if (err) {
-					console.log(err);
-					return callback(null);
+				if (!err && users.length > 0) {
+					resolve(index);
 				}
-				else if (users.length <= 0) {
-					return callback(null);
+				else {
+					count++;
+					if (count == (loggedIn.length)) {
+						resolve(null);
+					}
 				}
-				return callback(index);
 			});
 		}
-	}
+	});
 
-	if (!found) {
-		return callback(null);
-	}
+	promise.then((index) => {
+		return callback(index);
+	});
 }
 
 /**

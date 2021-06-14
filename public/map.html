@@ -15,10 +15,10 @@
 
         <script src="javascripts/navbar.js" defer></script>
         <script src="javascripts/map.js" async></script>
-        <script src="javascripts/profile.js" defer></script>
+        <script src="javascripts/profile.js" async></script>
     </head>
 
-    <body>
+    <body onload="populateHotspotsForMap();">
 
         <div>
 
@@ -75,7 +75,7 @@
             </nav>
 
             <div class="container-fluid" id="vmap">
-                <button v-on:click="addRandomLoc()">Click to add a random location!</button>
+                <!-- <button v-on:click="addRandomLoc()">Click to add a random location!</button> -->
                 <!-- <button v-on:click="removeLastLoc()">Click to remove a random location!</button> -->
                 <div class="container-fluid" id="map"></div>
             </div>
