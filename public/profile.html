@@ -103,43 +103,43 @@
                                     Check-In
                                 </a>
                             </li>
-                            <li class="nav-item">
+                            <li v-if="accountType == 'venueOwner' || accountType == 'official'" class="nav-item">
                                 <span class="nav-link link-dark text-center" style="font-size: x-large;">
                                     <!-- <svg class="bi me-2" width="16" height="16"><use xlink:href="#speedometer2"></use></svg> -->
                                     <strong><u>Managers</u></strong>
                                 </span>
                             </li>
-                            <li class="nav-item">
+                            <li v-if="accountType == 'venueOwner' || accountType == 'official'"  class="nav-item">
                                 <a v-on:click="profileNav = 'My-Venues'" onclick="populateUserVenues();" href="#" class="nav-link link-dark text-center" v-bind:class="[ profileNav === 'My-Venues' ?  'active' : profileNav === 'My-Venues-Clicked' ? 'active' : '' ]">
                                     <!-- <svg class="bi me-2" width="16" height="16"><use xlink:href="#grid"></use></svg> -->
                                     My Venues
                                 </a>
                             </li>
-                            <li class="nav-item">
+                            <li v-if="accountType == 'official'" class="nav-item">
                                 <span class="nav-link link-dark text-center" style="font-size: x-large;">
                                     <!-- <svg class="bi me-2" width="16" height="16"><use xlink:href="#speedometer2"></use></svg> -->
                                     <strong><u>Health Officials</u></strong>
                                 </span>
                             </li>
-                            <li class="nav-item">
+                            <li v-if="accountType == 'official'" class="nav-item">
                                 <a v-on:click="profileNav = 'Hotspots'" onclick="populateHotspots();" href="#" class="nav-link link-dark text-center" v-bind:class="[ profileNav === 'Hotspots' ?  'active' : profileNav === 'Hotspots-Clicked' ? 'active' : '' ]">
                                     <!-- <svg class="bi me-2" width="16" height="16"><use xlink:href="#people-circle"></use></svg> -->
                                     Hotspots
                                 </a>
                             </li>
-                            <li class="nav-item">
+                            <li v-if="accountType == 'official'" class="nav-item">
                                 <a v-on:click="profileNav = 'Users'" onclick="populateUsers();" href="#" class="nav-link link-dark text-center" v-bind:class="[ profileNav === 'Users' ?  'active' : profileNav === 'Users-Clicked' ? 'active' : '' ]">
                                     <!-- <svg class="bi me-2" width="16" height="16"><use xlink:href="#people-circle"></use></svg> -->
                                     Users
                                 </a>
                             </li>
-                            <li class="nav-item">
+                            <li v-if="accountType == 'official'" class="nav-item">
                                 <a v-on:click="profileNav = 'Venues'" onclick="populateVenues();" href="#" class="nav-link link-dark text-center" v-bind:class="[ profileNav === 'Venues' ?  'active' : profileNav === 'Venues-Clicked' ? 'active' : '' ]">
                                     <!-- <svg class="bi me-2" width="16" height="16"><use xlink:href="#people-circle"></use></svg> -->
                                     Venues
                                 </a>
                             </li>
-                            <li class="nav-item">
+                            <li v-if="accountType == 'official'" class="nav-item">
                                 <a v-on:click="profileNav = 'Invite'" href="#" class="nav-link link-dark text-center" v-bind:class="[ profileNav === 'Invite' ?  'active' : '' ]">
                                     <!-- <svg class="bi me-2" width="16" height="16"><use xlink:href="#people-circle"></use></svg> -->
                                     Invite
@@ -191,7 +191,7 @@
                             <h1>Check-In</h1>
                             <hr>
                             <div class="row mb-3" style="height: 70px;">
-                                <label for="checkinCode" class="form-label">Check-In to a Venue</label>
+                                <label for="checkinCode" class="form-label" style="margin-left: 50px;">Check-In to a Venue</label>
                                 <div class="col-3">
                                     <input type="text" class="form-control" id="checkinCode" placeholder="Enter a venue's code">
                                 </div>
@@ -211,18 +211,18 @@
                             <table class="table table-striped table-hover tableFixHead" id="history">
                                 <thead class="table-dark">
                                     <tr>
-                                        <th scope="col">#</th>
-                                        <th scope="col">Venue</th>
-                                        <th scope="col">Code</th>
-                                        <th scope="col">Date</th>
+                                        <th class="text-center" scope="col">#</th>
+                                        <th class="text-center" scope="col">Venue</th>
+                                        <th class="text-center" scope="col">Code</th>
+                                        <th class="text-center" scope="col">Date</th>
                                     </tr>
                                 </thead>
                                 <tbody v-for="(checkin, index) in checkins">
                                     <tr>
-                                        <th scope="row">{{ index+1 }}</th>
-                                        <td>{{ checkin.venue }}</td>
-                                        <td>{{ checkin.code }}</td>
-                                        <td>{{ checkin.time }}</td>
+                                        <th class="text-center" scope="row">{{ index+1 }}</th>
+                                        <td class="text-center">{{ checkin.venue }}</td>
+                                        <td class="text-center">{{ checkin.code }}</td>
+                                        <td class="text-center">{{ checkin.time }}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -234,27 +234,28 @@
                         <div v-if="profileNav == 'My-Venues'" class="row mb-3">
                             <div class="col-6">
                                 <div class="row d-flex justify-content-center">
-                                    <label for="venueName" class="form-label" style="margin-left: 200px;">Venue Name</label>
+                                    <label for="venueName" class="form-label" style="margin-left: 200px;">Create a new Venue</label>
                                     <div class="col-6">
                                         <input type="text" class="form-control" id="venueName" placeholder="Enter a name" maxlength="20">
                                     </div>
                                     <div class="col-4">
-                                        <button id="createVenueButton" type="create" class="btn btn-primary" onclick="setTimeout(unclickButton('createVenueButton'), 250);">Create</button>
+                                        <button id="createVenueButton" type="create" class="btn btn-primary" onclick="setTimeout(unclickButton('createVenueButton'), 250); createNewVenue();">Create</button>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="col-6">
                                 <div class="row d-flex justify-content-center">
-                                    <label for="venuesVenueCode" class="form-label" style="margin-left: 200px;">Venue Code</label>
+                                    <label for="venuesVenueCode" class="form-label" style="margin-left: 155px;">Delete an existing Venue</label>
                                     <div class="col-6">
                                         <input type="text" class="form-control" id="venuesVenueCode" placeholder="Enter a code" maxlength="20">
                                     </div>
                                     <div class="col-4">
-                                        <button id="removeVenueButton" type="create" class="btn btn-primary" onclick="setTimeout(unclickButton('removeVenueButton'), 250);">Remove</button>
+                                        <button id="removeVenueButton" type="create" class="btn btn-primary" onclick="setTimeout(unclickButton('removeVenueButton'), 250); removeVenue();">Remove</button>
                                     </div>
                                 </div>
                             </div>
+                            <div id="alerts" class="d-flex align-items-center justify-content-center"></div>
                         </div>
                         <div v-else>
                             <form>
@@ -292,18 +293,18 @@
                             <table class="table table-striped table-hover tableFixHead" id="history">
                                 <thead class="table-dark">
                                     <tr>
-                                        <th scope="col">#</th>
-                                        <th scope="col">Venue</th>
-                                        <th scope="col">Code</th>
-                                        <th scope="col">Location (lat, long)</th>
+                                        <th class="text-center" scope="col">#</th>
+                                        <th class="text-center" scope="col">Venue</th>
+                                        <th class="text-center" scope="col">Code</th>
+                                        <th class="text-center" scope="col">Location (lat, long)</th>
                                     </tr>
                                 </thead>
                                 <tbody v-for="(venue, index) in venues">
                                     <tr @click="popVenueData(venue.code);" v-on:click="profileNav = 'My-Venues-Clicked'" style="cursor: pointer;">
-                                        <th scope="row">{{ venue.id+1 }}</th>
-                                        <td>{{ venue.name }}</td>
-                                        <td>{{ venue.code }}</td>
-                                        <td>{{ venue.latitude }}, {{ venue.longitude }}</td>
+                                        <th class="text-center" scope="row">{{ index+1 }}</th>
+                                        <td class="text-center">{{ venue.name }}</td>
+                                        <td class="text-center">{{ venue.code }}</td>
+                                        <td class="text-center">{{ venue.latitude }}, {{ venue.longitude }}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -331,14 +332,15 @@
                         <h1>Manage Hotspots</h1>
                         <hr>
                         <div v-if="profileNav == 'Hotspots'" class="row mb-3">
-                            <label for="addHotspotButton" class="form-label">Venue Code</label>
+                            <label for="venueCode" class="form-label" style="margin-left: 25px;">Add or remove a Hotspot</label>
                             <div class="col-3">
-                                <input type="text" class="form-control" id="checkinCode" placeholder="Enter a venue's code">
+                                <input type="text" class="form-control" id="venueCode" placeholder="Enter a venue's code">
                             </div>
                             <div class="col-6">
-                                <button id="addHotspotButton" type="submit" class="btn btn-primary me-2" onclick="setTimeout(unclickButton('addHotspotButton'), 250);">Add</button>
-                                <button id="removeHotspotButton" type="submit" class="btn btn-primary" onclick="setTimeout(unclickButton('removeHotspotButton'), 250);">Remove</button>
+                                <button id="addHotspotButton" type="submit" class="btn btn-primary me-2" onclick="setTimeout(unclickButton('addHotspotButton'), 250); addHotspot();">Add</button>
+                                <button id="removeHotspotButton" type="submit" class="btn btn-primary" onclick="setTimeout(unclickButton('removeHotspotButton'), 250); removeHotspot();">Remove</button>
                             </div>
+                            <div id="alerts" class="d-flex align-items-center justify-content-center"></div>
                         </div>
                         <div v-else>
                             <form>
@@ -365,7 +367,7 @@
                                     <input type="text" class="form-control" id="venueLongitude" v-bind:value="activeVenue.longitude">
                                 </div>
                                 <button id="saveButton" type="submit" class="btn btn-primary" onclick="setTimeout(unclickButton('saveButton'), 250); saveVenueInformation();">Save</button>
-                                <div id="alerts" class="d-flex align-items-center justify-content-center col-6"></div>
+                                <div id="alerts" class="d-flex align-items-center justify-content-center"></div>
                             </form>
                         </div>
                         <br>
@@ -377,20 +379,20 @@
                             <table class="table table-striped table-hover tableFixHead" id="history">
                                 <thead class="table-dark">
                                     <tr>
-                                        <th scope="col">#</th>
-                                        <th scope="col">Venue</th>
-                                        <th scope="col">Code</th>
-                                        <th scope="col">Location (lat, long)</th>
-                                        <th scope="col">Since</th>
+                                        <th class="text-center" scope="col">#</th>
+                                        <th class="text-center" scope="col">Venue</th>
+                                        <th class="text-center" scope="col">Code</th>
+                                        <th class="text-center" scope="col">Location (lat, long)</th>
+                                        <th class="text-center" scope="col">Since</th>
                                     </tr>
                                 </thead>
                                 <tbody v-for="(hotspot, index) in hotspots">
                                     <tr @click="popVenueData(hotspot.venue.code);" v-on:click="profileNav = 'Hotspots-Clicked'" style="cursor: pointer;">
-                                        <th scope="row">{{ index+1 }}</th>
-                                        <td>{{ hotspot.venue.name }}</td>
-                                        <td>{{ hotspot.venue.code }}</td>
-                                        <td>{{ hotspot.venue.latitude }}, {{ hotspot.venue.longitude }}</td>
-                                        <td>{{ hotspot.since }}</td>
+                                        <th class="text-center" scope="row">{{ index+1 }}</th>
+                                        <td class="text-center">{{ hotspot.venue.name }}</td>
+                                        <td class="text-center">{{ hotspot.venue.code }}</td>
+                                        <td class="text-center">{{ hotspot.venue.latitude }}, {{ hotspot.venue.longitude }}</td>
+                                        <td class="text-center">{{ hotspot.since }}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -399,16 +401,16 @@
                             <table class="table table-striped table-hover tableFixHead" id="history">
                                 <thead class="table-dark">
                                     <tr>
-                                        <th scope="col">#</th>
-                                        <th scope="col">Name</th>
-                                        <th scope="col">Date</th>
+                                        <th class="text-center" scope="col">#</th>
+                                        <th class="text-center" scope="col">Name</th>
+                                        <th class="text-center" scope="col">Date</th>
                                     </tr>
                                 </thead>
                                 <tbody v-for="(checkin, index) in venueCheckins">
                                     <tr>
-                                        <th scope="row">{{ index+1 }}</th>
-                                        <td>{{ checkin.user }}</td>
-                                        <td>{{ checkin.time }}</td>
+                                        <th class="text-center" scope="row">{{ index+1 }}</th>
+                                        <td class="text-center">{{ checkin.user }}</td>
+                                        <td class="text-center">{{ checkin.time }}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -418,19 +420,18 @@
                         <h1>Manage Users</h1>
                         <hr>
                         <div v-if="profileNav == 'Users'" class="row mb-3">
-                            <div class="col-6">
-                                <div class="row d-flex justify-content-center">
-                                    <label for="usersEmail" class="form-label" style="margin-left: 200px;">Remove a user</label>
-                                    <div class="col-6">
-                                        <input type="text" class="form-control" id="usersEmail" placeholder="Enter an email address">
-                                    </div>
-                                    <div class="col-4">
-                                        <button id="removeUserButton" type="create" class="btn btn-primary" onclick="setTimeout(unclickButton('removeUserButton'), 250);">Remove</button>
-                                    </div>
-                                </div>
+                            <label for="usersEmail" class="form-label" style="margin-left: 50px;">Remove a user</label>
+                            <div class="col-3">
+                                <input type="text" class="form-control" id="usersEmail" placeholder="Enter an email address">
                             </div>
-
                             <div class="col-6">
+                                <button id="removeUserButton" type="create" class="btn btn-primary" onclick="setTimeout(unclickButton('removeUserButton'), 250); removeUser();">Remove</button>
+                            </div>
+                            <div id="alerts" class="d-flex align-items-center justify-content-center"></div>
+
+                            <!-- No time to implement search functionality :( -->
+
+                            <!-- <div class="col-6">
                                 <div class="row d-flex justify-content-center">
                                     <label for="usersSearch" class="form-label" style="margin-left: 250px;">Search</label>
                                     <div class="col-6">
@@ -440,7 +441,7 @@
                                         <button id="usersSearchButton" type="create" class="btn btn-primary" onclick="setTimeout(unclickButton('usersSearchButton'), 250);">Search</button>
                                     </div>
                                 </div>
-                            </div>
+                            </div> -->
                         </div>
                         <br v-if="profileNav == 'Users'">
                         <hr v-if="profileNav == 'Users'">
@@ -454,16 +455,16 @@
                             <table class="table table-striped table-hover tableFixHead" id="usersList">
                                 <thead class="table-dark">
                                     <tr>
-                                        <th scope="col">#</th>
-                                        <th scope="col">Name</th>
-                                        <th scope="col">Email</th>
+                                        <th class="text-center" scope="col">#</th>
+                                        <th class="text-center" scope="col">Name</th>
+                                        <th class="text-center" scope="col">Email</th>
                                     </tr>
                                 </thead>
                                 <tbody v-for="(user, index) in users">
                                     <tr @click="popUserData(user.email);" v-on:click="profileNav = 'Users-Clicked'" style="cursor: pointer;">
-                                        <th scope="row">{{ index+1 }}</th>
-                                        <td>{{ user.fName }} {{ user.lName }}</td>
-                                        <td>{{ user.email }}</td>
+                                        <th class="text-center" scope="row">{{ index+1 }}</th>
+                                        <td class="text-center">{{ user.fName }} {{ user.lName }}</td>
+                                        <td class="text-center">{{ user.email }}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -508,19 +509,18 @@
                         <h1>Manage Venues</h1>
                         <hr>
                         <div v-if="profileNav == 'Venues'" class="row mb-3">
-                            <div class="col-6">
-                                <div class="row d-flex justify-content-center">
-                                    <label for="manageVenuesRemoveButton" class="form-label" style="margin-left: 200px;">Venue Code</label>
-                                    <div class="col-6">
-                                        <input type="text" class="form-control" id="venuesVenueCode" placeholder="Enter a code" maxlength="20">
-                                    </div>
-                                    <div class="col-4">
-                                        <button id="manageVenuesRemoveButton" type="create" class="btn btn-primary" onclick="setTimeout(unclickButton('manageVenuesRemoveButton'), 250);">Remove</button>
-                                    </div>
-                                </div>
+                            <label for="venuesVenueCode" class="form-label" style="margin-left: 50px;">Remove a Venue</label>
+                            <div class="col-3">
+                                <input type="text" class="form-control" id="venuesVenueCode" placeholder="Enter a code" maxlength="20">
                             </div>
-
                             <div class="col-6">
+                                <button id="manageVenuesRemoveButton" type="create" class="btn btn-primary" onclick="setTimeout(unclickButton('manageVenuesRemoveButton'), 250); removeVenue();">Remove</button>
+                            </div>
+                            <div id="alerts" class="d-flex align-items-center justify-content-center"></div>
+
+                            <!-- No time to implement the search functionality :( -->
+
+                            <!-- <div class="col-6">
                                 <div class="row d-flex justify-content-center">
                                     <label for="venuesSearch" class="form-label" style="margin-left: 250px;">Search</label>
                                     <div class="col-6">
@@ -530,7 +530,7 @@
                                         <button id="venuesSearchButton" type="create" class="btn btn-primary" onclick="setTimeout(unclickButton('venuesSearchButton'), 250);">Search</button>
                                     </div>
                                 </div>
-                            </div>
+                            </div> -->
                         </div>
                         <div v-else>
                             <form>
@@ -556,7 +556,7 @@
                                     <input type="text" class="form-control" id="venueLongitude" v-bind:value="activeVenue.longitude">
                                 </div>
                                 <button id="saveButton" type="submit" class="btn btn-primary" onclick="setTimeout(unclickButton('saveButton'), 250); saveVenueInformation();">Save</button>
-                                <div id="alerts" class="d-flex align-items-center justify-content-center col-6"></div>
+                                <div id="alerts" class="d-flex align-items-center justify-content-center"></div>
                             </form>
                         </div>
                         <br>
@@ -568,20 +568,20 @@
                             <table class="table table-striped table-hover tableFixHead" id="history">
                                 <thead class="table-dark">
                                     <tr>
-                                        <th scope="col">#</th>
-                                        <th scope="col">Venue</th>
-                                        <th scope="col">Code</th>
-                                        <th scope="col">Location (lat, long)</th>
-                                        <th scope="col">Owner</th>
+                                        <th class="text-center" scope="col">#</th>
+                                        <th class="text-center" scope="col">Venue</th>
+                                        <th class="text-center" scope="col">Code</th>
+                                        <th class="text-center" scope="col">Location (lat, long)</th>
+                                        <th class="text-center" scope="col">Owner</th>
                                     </tr>
                                 </thead>
                                 <tbody v-for="(venue, index) in venues">
                                     <tr @click="popVenueData(venue.code);" v-on:click="profileNav = 'Venues-Clicked'" style="cursor: pointer;">
-                                        <th scope="row">{{ index+1 }}</th>
-                                        <td>{{ venue.name }}</td>
-                                        <td>{{ venue.code  }}</td>
-                                        <td>{{ venue.latitude}}, {{ venue.longitude }}</td>
-                                        <td>{{ venue.owner }}</td>
+                                        <th class="text-center" scope="row">{{ index+1 }}</th>
+                                        <td class="text-center">{{ venue.name }}</td>
+                                        <td class="text-center">{{ venue.code  }}</td>
+                                        <td class="text-center">{{ venue.latitude}}, {{ venue.longitude }}</td>
+                                        <td class="text-center">{{ venue.owner }}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -590,16 +590,16 @@
                             <table class="table table-striped table-hover tableFixHead" id="history">
                                 <thead class="table-dark">
                                     <tr>
-                                        <th scope="col">#</th>
-                                        <th scope="col">Name</th>
-                                        <th scope="col">Date</th>
+                                        <th class="text-center" scope="col">#</th>
+                                        <th class="text-center" scope="col">Name</th>
+                                        <th class="text-center" scope="col">Date</th>
                                     </tr>
                                 </thead>
                                 <tbody v-for="(checkin, index) in venueCheckins">
                                     <tr>
-                                        <th scope="row">{{ index+1 }}</th>
-                                        <td>{{ checkin.user }}</td>
-                                        <td>{{ checkin.time }}</td>
+                                        <th class="text-center" scope="row">{{ index+1 }}</th>
+                                        <td class="text-center">{{ checkin.user }}</td>
+                                        <td class="text-center">{{ checkin.time }}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -610,15 +610,16 @@
                         <hr>
                         <form>
                             <div class="row mb-3">
-                                <label for="inviteEmail" class="form-label">Invite another official</label>
+                                <label for="inviteEmail" class="form-label" style="margin-left: 70px;">Invite another official</label>
                                 <div class="col-4">
                                     <input type="text" class="form-control" id="inviteEmail" placeholder="Enter an email address">
                                 </div>
                                 <div class="col-3">
-                                    <button id="inviteEmailButton" type="submit" class="btn btn-primary" onclick="setTimeout(unclickButton('inviteEmailButton'), 250);">Invite</button>
+                                    <button id="inviteEmailButton" type="submit" class="btn btn-primary" onclick="setTimeout(unclickButton('inviteEmailButton'), 250); dummyInvite();">Invite</button>
                                 </div>
                             </div>
                         </form>
+                        <div id="alerts" class="d-flex align-items-center justify-content-center"></div>
                     </div>
                     <div v-else class="container-fluid">
                         <h5>You're not supposed to be here...</h5>

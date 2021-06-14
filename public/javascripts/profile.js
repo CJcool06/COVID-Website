@@ -1,5 +1,10 @@
 const accountType = Object.freeze({"normal": "normal", "venueOwner": "venueOwner", "official": "official"});
 
+/**
+ * Main user profile object.
+ * 
+ * This is used to display data on the profile page, as well as control the navigation of the page.
+ */
 var userProfile = new Vue({
     el: "#user",
     data: {
@@ -29,10 +34,20 @@ var userProfile = new Vue({
     }
 });
 
+/**
+ * Constrols the unclicking of a button. Bootstrap's native button clicking looks terrible!
+ * 
+ * @param {*} id - Button id
+ */
 function unclickButton(id) {
     document.getElementById(id).blur();
 }
 
+/**
+ * Populate the profile's venue data.
+ * 
+ * @param {*} venueCode - Code
+ */
 function populateVenueData(venueCode) {
     let http = new XMLHttpRequest();
     http.open("POST", "/venue");
@@ -53,6 +68,11 @@ function populateVenueData(venueCode) {
     http.send(JSON.stringify({'venueCode': venueCode}));
 }
 
+/**
+ * Populate the profile's venue checkins.
+ * 
+ * @param {*} venueCode - Code
+ */
 function populateVenueCheckins(venueCode) {
     let http = new XMLHttpRequest();
     http.open("POST", "/venue/checkins");
@@ -65,6 +85,7 @@ function populateVenueCheckins(venueCode) {
                 console.log(this.response.error);
             }
             else {
+                console.log(this.response);
                 userProfile.venueCheckins = this.response;
             }
         }
@@ -73,6 +94,11 @@ function populateVenueCheckins(venueCode) {
     http.send(JSON.stringify({'venueCode': venueCode}));
 }
 
+/**
+ * Populate the user's information data.
+ * 
+ * @param {*} email - User's email
+ */
 function populateUserData(email) {
     let http = new XMLHttpRequest();
     http.open("POST", "/user");
@@ -93,6 +119,9 @@ function populateUserData(email) {
     http.send(JSON.stringify({ 'email': email, 'authEmail': userProfile.email, 'authPassword': userProfile.password}));
 }
 
+/**
+ * Populates the user's check-ins.
+ */
 function populateUserCheckins() {
     let http = new XMLHttpRequest();
     http.open("POST", "/user/checkins");
@@ -113,6 +142,9 @@ function populateUserCheckins() {
     http.send(JSON.stringify({ 'email': userProfile.email }));
 }
 
+/**
+ * Populates the user's owned venues.
+ */
 function populateUserVenues() {
     let http = new XMLHttpRequest();
     http.open("POST", "/user/venues");
@@ -133,6 +165,9 @@ function populateUserVenues() {
     http.send(JSON.stringify({ 'email': userProfile.email }));
 }
 
+/**
+ * Populate all users.
+ */
 function populateUsers() {
     let http = new XMLHttpRequest();
     http.open("POST", "/users");
@@ -153,6 +188,9 @@ function populateUsers() {
     http.send(JSON.stringify({ 'email': userProfile.email, 'password': userProfile.password }));
 }
 
+/**
+ * Populate all venues.
+ */
 function populateVenues() {
     let http = new XMLHttpRequest();
     http.open("POST", "/venues");
@@ -173,6 +211,9 @@ function populateVenues() {
     http.send(JSON.stringify({ 'email': userProfile.email, 'password': userProfile.password }));
 }
 
+/**
+ * Populate all hotspots.
+ */
 function populateHotspots() {
     let http = new XMLHttpRequest();
     http.open("POST", "/hotspots");
@@ -194,6 +235,9 @@ function populateHotspots() {
     http.send(JSON.stringify({ 'email': userProfile.email, 'password': userProfile.password }));
 }
 
+/**
+ * Save the user's information.
+ */
 function saveUserInformation() {
     let fName = document.getElementById("firstName").value;
     let lName = document.getElementById("lastName").value;
@@ -203,7 +247,7 @@ function saveUserInformation() {
     let accountType = document.getElementById("accountType").value;
 
     let http = new XMLHttpRequest();
-    http.open("POST", "/save-user");
+    http.open("POST", "/user/save");
     http.responseType = "json";
     http.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
 
@@ -220,6 +264,7 @@ function saveUserInformation() {
                 userProfile.password = this.response.password;
                 userProfile.accountType = this.response.accountType;
                 nav.name = this.response.fName;
+                nav.accountType = this.response.accountType;
 
                 document.getElementById("newPassword").value = "";
                 postAlert("success", "Successfully saved your information!");
@@ -230,6 +275,9 @@ function saveUserInformation() {
     http.send(JSON.stringify({ 'fName': fName, 'lName': lName, 'oldPassword': oldPassword, 'newPassword': newPassword, 'email': email, 'accountType': accountType, 'authEmail': email, 'authPassword': oldPassword }));
 }
 
+/**
+ * Save another user's information.
+ */
 function saveOtherUserInformation() {
     let fName = document.getElementById("firstName").value;
     let lName = document.getElementById("lastName").value;
@@ -239,7 +287,7 @@ function saveOtherUserInformation() {
     let accountType = document.getElementById("accountType").value;
 
     let http = new XMLHttpRequest();
-    http.open("POST", "/save-user");
+    http.open("POST", "/user/save");
     http.responseType = "json";
     http.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
 
@@ -251,6 +299,10 @@ function saveOtherUserInformation() {
             else {
                 document.getElementById("newPassword").value = "";
                 populateUsers();
+                if (email == userProfile.email) {
+                    nav.name = fName;
+                    nav.accountType = userProfile.accountType;
+                }
                 postAlert("success", "Successfully saved!");
             }
         }
@@ -259,6 +311,9 @@ function saveOtherUserInformation() {
     http.send(JSON.stringify({ 'fName': fName, 'lName': lName, 'oldPassword': oldPassword, 'newPassword': newPassword, 'email': email, 'accountType': accountType, 'authEmail': userProfile.email, 'authPassword': userProfile.password }));
 }
 
+/**
+ * Save a venue's information.
+ */
 function saveVenueInformation() {
     let code = document.getElementById("venueCode").value;
     let name = document.getElementById("venueName").value;
@@ -266,7 +321,7 @@ function saveVenueInformation() {
     let longitude = document.getElementById("venueLongitude").value;
 
     let http = new XMLHttpRequest();
-    http.open("POST", "/save-venue");
+    http.open("POST", "/venue/save");
     http.responseType = "json";
     http.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
 
@@ -286,6 +341,9 @@ function saveVenueInformation() {
     http.send(JSON.stringify({ 'code': code, 'name': name, 'latitude': latitude, 'longitude': longitude, 'userEmail': userProfile.email, 'userPassword': userProfile.password }));
 }
 
+/**
+ * Process a user checking-in to a venue.
+ */
 function doCheckIn() {
     let code = document.getElementById("checkinCode").value;
 
@@ -312,12 +370,170 @@ function doCheckIn() {
     }
 }
 
+/**
+ * Process the creation of a new venue.
+ */
+function createNewVenue() {
+    let name = document.getElementById("venueName").value;
+
+    if (name != "") {
+        let code = genRandom10DigitCode();
+        let http = new XMLHttpRequest();
+        http.open("POST", "/venue/new");
+        http.responseType = "json";
+        http.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
+
+        http.onreadystatechange = function() {
+            if (this.readyState == 4) {
+                if (this.status != 200) {
+                    console.log(this.response.error);
+                }
+                else {
+                    populateUserVenues();
+                    postAlert("success", "Successfully created a new venue!");
+                }
+            }
+        }
+
+        http.send(JSON.stringify({ 'ownerEmail': userProfile.email, 'ownerPassword': userProfile.password, 'name': name, 'code': code, 'latitude': 0, 'longitude': 0 }));
+        document.getElementById("venueName").value = "";
+    }
+}
+
+/**
+ * Process the removal of an existing venue.
+ */
+function removeVenue() {
+    let code = document.getElementById("venuesVenueCode").value;
+
+    if (code != "") {
+        let http = new XMLHttpRequest();
+        http.open("POST", "/venue/remove");
+        http.responseType = "json";
+        http.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
+
+        http.onreadystatechange = function() {
+            if (this.readyState == 4) {
+                if (this.status != 200) {
+                    console.log(this.response.error);
+                }
+                else {
+                    populateUserVenues();
+                    postAlert("success", "Successfully removed the venue!");
+                }
+            }
+        }
+
+        http.send(JSON.stringify({ 'email': userProfile.email, 'password': userProfile.password, 'venueCode': code }));
+        document.getElementById("venuesVenueCode").value = "";
+    }
+}
+
+/**
+ * Process the addition of a new hotspot.
+ */
+function addHotspot() {
+    let code = document.getElementById("venueCode").value;
+
+    if (code != "") {
+        let http = new XMLHttpRequest();
+        http.open("POST", "/hotspots/add");
+        http.responseType = "json";
+        http.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
+
+        http.onreadystatechange = function() {
+            if (this.readyState == 4) {
+                if (this.status != 200) {
+                    console.log(this.response.error);
+                }
+                else {
+                    populateHotspots();
+                    postAlert("success", "Successfully added the hotspot!");
+                }
+            }
+        }
+
+        http.send(JSON.stringify({ 'email': userProfile.email, 'password': userProfile.password, 'venueCode': code }));
+        document.getElementById("venueCode").value = "";
+    }
+}
+
+/**
+ * Process the removal of an existing hotspot.
+ */
+function removeHotspot() {
+    let code = document.getElementById("venueCode").value;
+
+    if (code != "") {
+        let http = new XMLHttpRequest();
+        http.open("POST", "/hotspots/remove");
+        http.responseType = "json";
+        http.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
+
+        http.onreadystatechange = function() {
+            if (this.readyState == 4) {
+                if (this.status != 200) {
+                    console.log(this.response.error);
+                }
+                else {
+                    populateHotspots();
+                    postAlert("success", "Successfully removed the hotspot!");
+                }
+            }
+        }
+
+        http.send(JSON.stringify({ 'email': userProfile.email, 'password': userProfile.password, 'venueCode': code }));
+        document.getElementById("venueCode").value = "";
+    }
+}
+
+/**
+ * Processes the removal of a user.
+ */
+function removeUser() {
+    let email = document.getElementById("usersEmail").value;
+
+    if (email != "") {
+        let http = new XMLHttpRequest();
+        http.open("POST", "/user/remove");
+        http.responseType = "json";
+        http.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
+
+        http.onreadystatechange = function() {
+            if (this.readyState == 4) {
+                if (this.status != 200) {
+                    console.log(this.response.error);
+                }
+                else {
+                    populateUsers();
+                    postAlert("success", "Successfully removed the user!");
+                }
+            }
+        }
+
+        http.send(JSON.stringify({ 'email': email, 'authEmail': userProfile.email, 'authPassword': userProfile.password }));
+        document.getElementById("userEmail").value = "";
+    }
+}
+
+/**
+ * Processes a dummy invite as I ran out of time to implement a proper email service.
+ */
+function dummyInvite() {
+    let email = document.getElementById("inviteEmail").value;
+
+    if (email != "") {
+        postAlert("success", "Invite sent!");
+        document.getElementById("inviteEmail").value = "";
+    }
+}
 
 
-
+/**
+ * UTILITY FUNCTIONS
+ */
 
 let currentTimeout = null;
-
 function postAlert(type, message) {
     let wrapper = document.getElementById("alerts");
     wrapper.innerHTML = 
@@ -335,4 +551,14 @@ function postAlert(type, message) {
         let alert = new bootstrap.Alert(alertNode);
         alert.close();
     }, 3000);
+}
+
+function genRandom10DigitCode() {
+    var result = '';
+    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for (let i = 0; i < 10; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+   return result;
 }

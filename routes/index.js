@@ -39,9 +39,10 @@ router.get('/privacy_policy', function(req, res, next) {
 // For testing
 // var account = {'id': 0, 'fName': 'Person', 'lName': "Smith", 'email': 'chris@gmail.com', 'password': '12345', 'accountType': "normal"};
 var loggedIn = [{}];
-var venues = [ { 'id': 0, 'code': 'GVMkhjbd', "name": "Starbucks", "lat": -34.928, "long": 138.601 }, { 'id': 1, 'code': 'KJNi676d', "name": "Bunnings", "lat": -34.920, "long": 138.610 }, { 'id': 2, 'code': '87asgdyhD', "name": "Adelaide Uni", "lat": -34.931, "long": 138.596 } ];
-var users = [ {'id': 0, 'fName': 'Chris', 'lName': "Bob", 'email': 'chris@gmail.com', 'password': '12345', 'accountType': "normal"}, {'id': 0, 'fName': 'Matt', 'lName': "Smith", 'email': 'matt@gmail.com', 'password': '12345', 'accountType': "normal"}, {'id': 0, 'fName': 'Chelsea', 'lName': "Smith", 'email': 'chelsea@gmail.com', 'password': '12345', 'accountType': "normal"}, {'id': 0, 'fName': 'Angel', 'lName': "Allen", 'email': 'angel@gmail.com', 'password': '12345', 'accountType': "normal"} ];
 
+/**
+ * Logs a user into the server and stores their cookie for future page loads.
+ */
 router.post("/login", function(req, res, next) {
     let email = req.body.email;
     let password = req.body.password;
@@ -65,6 +66,9 @@ router.post("/login", function(req, res, next) {
 	});
 });
 
+/**
+ * Logs a user out.
+ */
 router.post("/logout", function(req, res, next) {
 	let cookie = req.body.cookie;
 
@@ -79,6 +83,9 @@ router.post("/logout", function(req, res, next) {
 	});
 });
 
+/**
+ * Checks whether a user is logged in.
+ */
 router.post("/loggedin", function(req, res, next) {
 	let cookie = req.body.cookie;
 
@@ -92,10 +99,13 @@ router.post("/loggedin", function(req, res, next) {
 	});
 });
 
+/**
+ * Gets a venue from the database.
+ */
 router.post("/venue", function(req, res, next) {
 	let venueCode = req.body.venueCode;
 
-	getVenueDB(venueCode, (err, venues) => {
+	getVenueFromCodeDB(venueCode, (err, venues) => {
 		if (err) {
 			console.log(err);
 			res.status(203).json({"error": "Database error."});
@@ -109,6 +119,9 @@ router.post("/venue", function(req, res, next) {
 	});
 });
 
+/**
+ * Gets a user from the database.
+ */
 router.post("/user", function(req, res, next) {
 	let email = req.body.email;
 	let authEmail = req.body.authEmail;
@@ -135,6 +148,9 @@ router.post("/user", function(req, res, next) {
 	});
 });
 
+/**
+ * Gets all users in the database.
+ */
 router.post("/users", function(req, res, next) {
 	let email = req.body.email;
 	let password = req.body.password;
@@ -157,6 +173,9 @@ router.post("/users", function(req, res, next) {
 	});
 });
 
+/**
+ * Gets all venues in the database.
+ */
 router.post("/venues", function(req, res, next) {
 	let email = req.body.email;
 	let password = req.body.password;
@@ -194,7 +213,10 @@ router.post("/venues", function(req, res, next) {
 	});
 });
 
-router.post("/save-user", function(req, res) {
+/**
+ * Saves a user's information.
+ */
+router.post("/user/save", function(req, res) {
 	let fName = req.body.fName;
     let lName = req.body.lName;
     let oldPassword = req.body.oldPassword;
@@ -252,7 +274,10 @@ router.post("/save-user", function(req, res) {
 	}
 });
 
-router.post("/save-venue", function(req, res) {
+/**
+ * Saves a venue's information.
+ */
+router.post("/venue/save", function(req, res) {
 	let code = req.body.code;
     let name = req.body.name;
     let latitude = req.body.latitude;
@@ -272,7 +297,7 @@ router.post("/save-venue", function(req, res) {
 			return res.status(203).json({"error": "Wrong password."});
 		}
 		else {
-			getVenueDB(code, (err, venues) => {
+			getVenueFromCodeDB(code, (err, venues) => {
 				if (err) {
 					console.log(err);
 					res.status(203).json({"error": "Database error."});
@@ -285,13 +310,16 @@ router.post("/save-venue", function(req, res) {
 						res.status(203).json({"error": "Wrong permissions."});
 					}
 					else {
+						let oldName = venues[0].name;
 						updateVenueDB(code, name, latitude, longitude, (err, result) => {
 							if (err) {
 								res.status(203).json({"error": "No venue was found."});
 							}
 							else {
-								updateVenueInCheckinsDB(code, name, (error, result) => {
-									res.sendStatus(200);
+								updateVenueInCheckinsDB(code, name, (err, result) => {
+									updateVenueInHotspotsDB(oldName, name, (err, result) => {
+										res.sendStatus(200);
+									});
 								});
 							}
 						});
@@ -302,6 +330,9 @@ router.post("/save-venue", function(req, res) {
 	});
 });
 
+/**
+ * Gets all the check-ins a user has made.
+ */
 router.post("/user/checkins", function(req, res, next) {
 	let email = req.body.email;
 
@@ -342,6 +373,9 @@ router.post("/user/checkins", function(req, res, next) {
 	});
 });
 
+/**
+ * Gets all venues owned by a user.
+ */
 router.post("/user/venues", function(req, res, next) {
 	let email = req.body.email;
 
@@ -366,6 +400,9 @@ router.post("/user/venues", function(req, res, next) {
 	});
 });
 
+/**
+ * Gets all check-ins made at a venue.
+ */
 router.post("/venue/checkins", function(req, res, next) {
 	let code = req.body.venueCode;
 
@@ -374,8 +411,8 @@ router.post("/venue/checkins", function(req, res, next) {
 			console.log(err);
 			return res.status(203).json({"error": "Database error."});
 		}
-		else if (users.length <= 0) {
-			return res.status(203).json({"error": "No checkins were found."});
+		else if (checkins.length <= 0) {
+			return res.status(200).json({});
 		}
 		else {
 			let changeNames = new Promise((resolve, reject) => {
@@ -399,6 +436,9 @@ router.post("/venue/checkins", function(req, res, next) {
 	});
 });
 
+/**
+ * Get all hotspots.
+ */
 router.post("/hotspots", function(req, res, next) {
 	let email = req.body.email;
 	let password = req.body.password;
@@ -417,7 +457,7 @@ router.post("/hotspots", function(req, res, next) {
 					let changeNames = new Promise((resolve, reject) => {
 						let count = 0;
 						for (const index in allHotspots) {
-							getVenueDB(allHotspots[index].venue, (err, venues) => {
+							getVenueFromCodeDB(allHotspots[index].venue, (err, venues) => {
 								allHotspots[index].venue = venues[0];
 								allHotspots[index].since = new Date(allHotspots[index].since).toISOString().replace("T", " ").replace(".000Z", "");
 								count++;
@@ -437,6 +477,9 @@ router.post("/hotspots", function(req, res, next) {
 	});
 });
 
+/**
+ * Submit a check-in for a user.
+ */
 router.post("/user/check-in", function(req, res, next) {
 	let code = req.body.venueCode;
 	let email = req.body.userEmail;
@@ -454,15 +497,15 @@ router.post("/user/check-in", function(req, res, next) {
 			return res.status(203).json({"error": "Incorrect password."});
 		}
 		else {
-			getVenueDB(code, (err, venues) => {
+			getVenueFromCodeDB(code, (err, venues) => {
 				if (err) {
-					return res.status(203).json({"error": "Problem getting user's venues."})
+					return res.status(203).json({"error": "Problem getting user's venues."});
 				}
 				else if (venues.length <= 0) {
-					return res.status(203).json({"error": "No venue found with that code."})
+					return res.status(203).json({"error": "No venue found with that code."});
 				}
 				else {
-					addCheckin(users[0].id, venues[0].name, venues[0].code, new Date().toISOString().slice(0, 19).replace('T', ' '), (err, result) => {
+					addCheckInDB(users[0].id, venues[0].name, venues[0].code, new Date().toISOString().slice(0, 19).replace('T', ' '), (err, result) => {
 						if (err) {
 							console.log(err);
 							return res.status(203).json({"error": "Database error."});
@@ -472,12 +515,225 @@ router.post("/user/check-in", function(req, res, next) {
 						}
 					});
 				}
+			});
+		}
+	});
+});
+
+/**
+ * Add a new venue.
+ */
+router.post("/venue/new", function(req, res, next) {
+	let ownerEmail = req.body.ownerEmail;
+	let ownerPassword = req.body.ownerPassword;
+	let code = req.body.code;
+	let name = req.body.name;
+	let latitude = req.body.latitude;
+	let longitude = req.body.longitude;
+
+	getUserFromEmailDB(ownerEmail, (err, users) => {
+		if (err) {
+			console.log(err);
+			return res.status(203).json({"error": "Database error."});
+		}
+		else if (users.length <= 0) {
+			return res.status(203).json({"error": "No user was found."});
+		}
+		else if (users[0].password != ownerPassword) {
+			return res.status(203).json({"error": "Incorrect password."});
+		}
+		else {
+			getVenueFromCodeDB(code, (err, venues) => {
+				if (err) {
+					return res.status(203).json({"error": "Problem getting user's venues."});
+				}
+				else if (venues.length > 0) {
+					return res.status(203).json({"error": "A venue already exists with that code."});
+				}
+				else {
+					addVenueDB(users[0].id, name, code, latitude, longitude, (err, result) => {
+						if (err) {
+							console.log(err);
+							return res.status(203).json({"error": "Database error."});
+						}
+						else {
+							return res.sendStatus(200);
+						}
+					});
+				}
+			});
+		}
+	});
+});
+
+/**
+ * Remove an existing venue.
+ */
+router.post("/venue/remove", function(req, res, next) {
+	let email = req.body.email;
+	let password = req.body.password;
+	let code = req.body.venueCode;
+	console.log(code);
+
+	sensitiveInformationAuth(email, password, (authenticated) => {
+		if (!authenticated) {
+			res.status(203).json({"error": "Wrong permissions."});
+		}
+		else {
+			getUserFromEmailDB(email, (err, users) => {
+				if (err) {
+					console.log(err);
+					return res.status(203).json({"error": "Database error."});
+				}
+				else if (users.length <= 0) {
+					return res.status(203).json({"error": "No user was found with that code."});
+				}
+				else {
+					getVenueFromCodeDB(code, (err, venues) => {
+						if (err) {
+							return res.status(203).json({"error": "Problem getting user's venues."});
+						}
+						else if (venues.length <= 0) {
+							return res.status(203).json({"error": "No venue found with that code."});
+						}
+						else {
+							removeVenueDB(code, (err, result) => {
+								if (err) {
+									console.log(err);
+									return res.status(203).json({"error": "Database error."});
+								}
+								else {
+									removeVenueInHotspotsDB(code, (err, result) => {
+										res.sendStatus(200);
+									});
+								}
+							});
+						}
+					});
+				}
+			});
+		}
+	});
+});
+
+/**
+ * Add a venue as a hotspot.
+ */
+router.post("/hotspots/add", function(req, res, next) {
+	let email = req.body.email;
+	let password = req.body.password;
+	let code = req.body.venueCode;
+
+	sensitiveInformationAuth(email, password, (authenticated) => {
+		if (!authenticated) {
+			res.status(203).json({"error": "Wrong permissions."});
+		}
+		else {
+			getHotspotFromCodeDB(code, (err, hotspots) => {
+				if (err) {
+					return res.status(203).json({"error": "Problem getting user's venues."});
+				}
+				else if (venues.length > 0) {
+					return res.status(203).json({"error": "That hotspot already exists."});
+				}
+				else {
+					getVenueFromCodeDB(code, (err, venues) => {
+						if (err) {
+							return res.status(203).json({"error": "Problem getting user's venues."});
+						}
+						else if (venues.length <= 0) {
+							return res.status(203).json({"error": "No venue was found with that code."});
+						}
+						else {
+							addHotspotDB(code, new Date().toISOString().slice(0, 19).replace('T', ' '), (err, result) => {
+								if (err) {
+									console.log(err);
+									return res.status(203).json({"error": "Database error."});
+								}
+								else {
+									return res.sendStatus(200);
+								}
+							});
+						}
+					});
+				}
 			})
 		}
 	});
 });
 
+/**
+ * Remove a venue as a hotspot.
+ */
+router.post("/hotspots/remove", function(req, res, next) {
+	let email = req.body.email;
+	let password = req.body.password;
+	let code = req.body.venueCode;
 
+	sensitiveInformationAuth(email, password, (authenticated) => {
+		if (!authenticated) {
+			res.status(203).json({"error": "Wrong permissions."});
+		}
+		else {
+			getVenueFromCodeDB(code, (err, venues) => {
+				if (err) {
+					return res.status(203).json({"error": "Problem getting user's venues."});
+				}
+				else if (venues.length <= 0) {
+					return res.status(203).json({"error": "No venue was found with that code."});
+				}
+				else {
+					removeVenueInHotspotsDB(code, (err, result) => {
+						if (err) {
+							console.log(err);
+							return res.status(203).json({"error": "Database error."});
+						}
+						else {
+							return res.sendStatus(200);
+						}
+					});
+				}
+			});
+		}
+	});
+});
+
+/**
+ * Delete a user profile.
+ */
+router.post("/user/remove", function(req, res, next) {
+	let email = req.body.email;
+	let authEmail = req.body.authEmail;
+	let authPassword = req.body.authPassword;
+
+	sensitiveInformationAuth(authEmail, authPassword, (authenticated) => {
+		if (!authenticated) {
+			res.status(203).json({"error": "Wrong permissions."});
+		}
+		else {
+			getUserFromEmailDB(email, (err, users) => {
+				if (err) {
+					console.log(err);
+					return res.status(203).json({"error": "Database error."});
+				}
+				else if (users.length <= 0) {
+					return res.status(203).json({"error": "No user was found with that code."});
+				}
+				else {
+					removeUsersVenuesDB(users[0].id, (err, result) => {
+						removeUserDB(email, (err, result) => {
+							res.sendStatus(200);
+						});
+					});
+				}
+			});
+		}
+	});
+});
+
+/**
+ * Utility function for checking if a user is logged in from their cookie.
+*/
 function getLoggedInUser(cookie, callback) {
 	let found = false;
 	for (const index in loggedIn) {
@@ -503,6 +759,9 @@ function getLoggedInUser(cookie, callback) {
 	}
 }
 
+/**
+ * Utility function for getting the id of a logged in user from their cookie.
+*/
 function getLoggedInUserIndex(cookie, callback) {
 	let found = false;
 	for (const index in loggedIn) {
@@ -526,6 +785,10 @@ function getLoggedInUserIndex(cookie, callback) {
 	}
 }
 
+/**
+ * Authenticates the password and account type for sensitive information.
+ * Only official accounts pass this authentication with a correct password.
+ */
 function sensitiveInformationAuth(email, password, callback) {
 	getUserFromEmailDB(email, (err, users) => {
 		if (err) {
@@ -552,6 +815,9 @@ function sensitiveInformationAuth(email, password, callback) {
 
 /* DATABASE QUERIES */
 
+/**
+ * The database pool.
+ */
 const pool = mysql.createPool({
 	connectionLimit: 10,
 	host: "localhost",
@@ -560,6 +826,11 @@ const pool = mysql.createPool({
 	database: "covidw"
 });
 
+/**
+ * Gets all users in the database.
+ * 
+ * @param {*} callback - (error, users)
+ */
 function getUsersDB(callback) {
 	pool.getConnection((err, con) => {
 		if (err) {
@@ -575,6 +846,12 @@ function getUsersDB(callback) {
 	});
 }
 
+/**
+ * Gets a user in the database from their email.
+ * 
+ * @param {*} email - The user's email
+ * @param {*} callback - (error, users)
+ */
 function getUserFromEmailDB(email, callback) {
 	pool.getConnection((err, con) => {
 		if (err) {
@@ -590,6 +867,12 @@ function getUserFromEmailDB(email, callback) {
 	});
 }
 
+/**
+ * Gets a user in the database from their ID.
+ * 
+ * @param {*} id - The user's id
+ * @param {*} callback - (error, users)
+ */
 function getUserFromIDDB(id, callback) {
 	pool.getConnection((err, con) => {
 		if (err) {
@@ -605,6 +888,11 @@ function getUserFromIDDB(id, callback) {
 	});
 }
 
+/**
+ * Gets all venues in the database.
+ * 
+ * @param {*} callback - (error, venues)
+ */
 function getVenuesDB(callback) {
 	pool.getConnection((err, con) => {
 		if (err) {
@@ -620,7 +908,13 @@ function getVenuesDB(callback) {
 	});
 }
 
-function getVenueDB(code, callback) {
+/**
+ * Gets a venue in the database from it's code.
+ * 
+ * @param {*} code - The venue's code
+ * @param {*} callback - (error, venues)
+ */
+function getVenueFromCodeDB(code, callback) {
 	pool.getConnection((err, con) => {
 		if (err) {
 			return callback(err, null);
@@ -635,6 +929,37 @@ function getVenueDB(code, callback) {
 	});
 }
 
+/**
+ * Gets a hotspot in the database from the venue's code.
+ * 
+ * @param {*} code - The venue's code
+ * @param {*} callback - (error, hotspots)
+ */
+ function getHotspotFromCodeDB(code, callback) {
+	pool.getConnection((err, con) => {
+		if (err) {
+			return callback(err, null);
+		}
+		con.query("SELECT * FROM hotspots WHERE venue = '" + code + "'", (err, hotspots) => {
+			if (err) {
+				return callback(err, null);
+			}
+			return callback(null, hotspots);
+		});
+		con.release();
+	});
+}
+
+/**
+ * Updates a user in the database using their email.
+ * 
+ * @param {*} fName - First name
+ * @param {*} lName - Last name
+ * @param {*} email - Email
+ * @param {*} password - Password
+ * @param {*} accountType - Account type
+ * @param {*} callback (error, result)
+ */
 function updateUserDB(fName, lName, email, password, accountType, callback) {
 	pool.getConnection((err, con) => {
 		if (err) {
@@ -650,6 +975,15 @@ function updateUserDB(fName, lName, email, password, accountType, callback) {
 	});
 }
 
+/**
+ * Updates a venue in the database using it's code.
+ * 
+ * @param {*} code - Code
+ * @param {*} name - Name
+ * @param {*} latitude - Latitude coordinate
+ * @param {*} longitude - Longitude coordinate
+ * @param {*} callback (error, result)
+ */
 function updateVenueDB(code, name, latitude, longitude, callback) {
 	pool.getConnection((err, con) => {
 		if (err) {
@@ -665,6 +999,13 @@ function updateVenueDB(code, name, latitude, longitude, callback) {
 	});
 }
 
+/**
+ * Updates the venues in the checkins database with a new name.
+ * 
+ * @param {*} code - Code
+ * @param {*} name - Name
+ * @param {*} callback  - (error, result)
+ */
 function updateVenueInCheckinsDB(code, name, callback) {
 	pool.getConnection((err, con) => {
 		if (err) {
@@ -680,6 +1021,34 @@ function updateVenueInCheckinsDB(code, name, callback) {
 	});
 }
 
+/**
+ * Updates the venues in the hotspots database with a new name.
+ * 
+ * @param {*} oldName - Old name
+ * @param {*} newName - New name
+ * @param {*} callback - (error, result)
+ */
+function updateVenueInHotspotsDB(oldName, newName, callback) {
+	pool.getConnection((err, con) => {
+		if (err) {
+			return callback(err, null);
+		}
+		con.query("UPDATE hotspots SET venue = '" + newName + "' WHERE venue = '" + oldName + "'", (err, result) => {
+			if (err) {
+				return callback(err, null);
+			}
+			return callback(null, result);
+		});
+		con.release();
+	});
+}
+
+/**
+ * Gets the checkins made by the user.
+ * 
+ * @param {*} id - User's id
+ * @param {*} callback - (error, checkins)
+ */
 function getUserCheckinsDB(id, callback) {
 	pool.getConnection((err, con) => {
 		if (err) {
@@ -695,6 +1064,12 @@ function getUserCheckinsDB(id, callback) {
 	});
 }
 
+/**
+ * Gets the venues owned by the user.
+ * 
+ * @param {*} id - User id
+ * @param {*} callback - (error, venues)
+ */
 function getUserVenuesDB(id, callback) {
 	pool.getConnection((err, con) => {
 		if (err) {
@@ -710,6 +1085,12 @@ function getUserVenuesDB(id, callback) {
 	});
 }
 
+/**
+ * Gets the checkins that were made at the venue.
+ * 
+ * @param {*} code - Venue code
+ * @param {*} callback - (error, checkins)
+ */
 function getVenueCheckinsDB(code, callback) {
 	pool.getConnection((err, con) => {
 		if (err) {
@@ -725,6 +1106,11 @@ function getVenueCheckinsDB(code, callback) {
 	});
 }
 
+/**
+ * Gets all hotspots in the database.
+ * 
+ * @param {*} callback - (error, hotspots)
+ */
 function getHotspotsDB(callback) {
 	pool.getConnection((err, con) => {
 		if (err) {
@@ -740,7 +1126,16 @@ function getHotspotsDB(callback) {
 	});
 }
 
-function addCheckin(userID, venueName, venueCode, time, callback) {
+/**
+ * Adds a new check-in to the database.
+ * 
+ * @param {*} userID - User making the checkin
+ * @param {*} venueName - Venue name
+ * @param {*} venueCode - Venue code
+ * @param {*} time - The time of the check-in
+ * @param {*} callback - (error, result)
+ */
+function addCheckInDB(userID, venueName, venueCode, time, callback) {
 	pool.getConnection((err, con) => {
 		if (err) {
 			return callback(err, null);
@@ -756,12 +1151,174 @@ function addCheckin(userID, venueName, venueCode, time, callback) {
                         callback(err, null);
                     }
                     else {
-                        console.log(result);
                         callback(null, result);
                     }
                 });
             }
         });
+        con.release();
+	});
+}
+
+/**
+ * Adds a venue to the database.
+ * 
+ * @param {*} ownerID - Venue owner's id
+ * @param {*} venueName - Name
+ * @param {*} venueCode - Code
+ * @param {*} latitude - Latitude coordinates
+ * @param {*} longitude - Longitude coordinates
+ * @param {*} callback - (error, result)
+ */
+function addVenueDB(ownerID, venueName, venueCode, latitude, longitude, callback) {
+	pool.getConnection((err, con) => {
+		if (err) {
+			return callback(err, null);
+		}
+		con.query('SELECT MAX(id) as maxID FROM venues', (err, maxQ) => {
+            if (err) {
+                callback(err, null);
+            }
+            else {
+                con.query('INSERT INTO venues VALUES(' + (maxQ[0].maxID + 1) + ',' + ownerID + ',\'' + venueName + '\',\'' + venueCode + '\',\'' + latitude + '\',\'' + longitude + '\')', (err, result) => {
+                    if (err) {
+                        console.log(err);
+                        callback(err, null);
+                    }
+                    else {
+                        callback(null, result);
+                    }
+                });
+            }
+        });
+        con.release();
+	});
+}
+
+/**
+ * Remove a venue from the database.
+ * 
+ * @param {*} code - Venue code
+ * @param {*} callback - (error, result)
+ */
+function removeVenueDB(code, callback) {
+	pool.getConnection((err, con) => {
+		if (err) {
+			return callback(err, null);
+		}
+		con.query('DELETE FROM venues WHERE code = \'' + code + '\'', (err, result) => {
+			if (err) {
+				console.log(err);
+				callback(err, null);
+			}
+			else {
+				callback(null, result);
+			}
+		});
+        con.release();
+	});
+}
+
+/**
+ * Remove a hotspot from the hotspots database given the venue.
+ * 
+ * @param {*} code - Venue code
+ * @param {*} callback - (error, result)
+ */
+function removeVenueInHotspotsDB(code, callback) {
+	pool.getConnection((err, con) => {
+		if (err) {
+			return callback(err, null);
+		}
+		con.query('DELETE FROM hotspots WHERE venue = \'' + code + '\'', (err, result) => {
+			if (err) {
+				console.log(err);
+				callback(err, null);
+			}
+			else {
+				callback(null, result);
+			}
+		});
+        con.release();
+	});
+}
+
+/**
+ * Add a hotspot to the database.
+ * 
+ * @param {*} code - Venue code
+ * @param {*} time - Time of becoming a hotspot
+ * @param {*} callback - (error, result)
+ */
+function addHotspotDB(code, time, callback) {
+	pool.getConnection((err, con) => {
+		if (err) {
+			return callback(err, null);
+		}
+		con.query('SELECT MAX(id) as maxID FROM hotspots', (err, maxQ) => {
+            if (err) {
+                callback(err, null);
+            }
+            else {
+                con.query('INSERT INTO hotspots VALUES(' + (maxQ[0].maxID + 1) + ',\'' + code + '\',\'' + time + '\')', (err, result) => {
+                    if (err) {
+                        console.log(err);
+                        callback(err, null);
+                    }
+                    else {
+                        callback(null, result);
+                    }
+                });
+            }
+        });
+        con.release();
+	});
+}
+
+/**
+ * Remove a user from the database.
+ * 
+ * @param {*} email - User's email
+ * @param {*} callback - (user, result)
+ */
+function removeUserDB(email, callback) {
+	pool.getConnection((err, con) => {
+		if (err) {
+			return callback(err, null);
+		}
+		con.query('DELETE FROM users WHERE email = \'' + email + '\'', (err, result) => {
+			if (err) {
+				console.log(err);
+				callback(err, null);
+			}
+			else {
+				callback(null, result);
+			}
+		});
+        con.release();
+	});
+}
+
+/**
+ * Remove venues that are owned by the user.
+ * 
+ * @param {*} userID - User's id
+ * @param {*} callback - (error, result)
+ */
+function removeUsersVenuesDB(userID, callback) {
+	pool.getConnection((err, con) => {
+		if (err) {
+			return callback(err, null);
+		}
+		con.query('DELETE FROM venues WHERE owner = ' + userID + '', (err, result) => {
+			if (err) {
+				console.log(err);
+				callback(err, null);
+			}
+			else {
+				callback(null, result);
+			}
+		});
         con.release();
 	});
 }

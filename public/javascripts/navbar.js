@@ -8,7 +8,8 @@ var nav = new Vue({
     el: "#nav",
     data: {
         loggedIn: false,
-        name: ""
+        name: "",
+        accountType: ""
     }
 });
 
@@ -37,6 +38,7 @@ function login() {
                 userProfile.accountType = this.response.accountType;
                 nav.loggedIn = true;
                 nav.name = this.response.fName;
+                nav.accountType = this.response.accountType;
             }
         }
     }
@@ -66,6 +68,7 @@ function logout() {
                 userProfile.accountType = "";
                 nav.loggedIn = false;
                 nav.name = "";
+                nav.accountType = "";
             }
         }
     }
@@ -95,6 +98,7 @@ function loadUser() {
                 userProfile.accountType = this.response.accountType;
                 nav.loggedIn = true;
                 nav.name = this.response.fName;
+                nav.accountType = this.response.accountType;
             }
         }
     }
