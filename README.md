@@ -2,7 +2,7 @@
 
 npm install
 
-Database:
-name: covidw
-user: root
-password: password
+**Database**  
+name: covidw  
+user: root  
+password: password  
